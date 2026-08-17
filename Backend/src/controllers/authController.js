@@ -1,4 +1,5 @@
 const user = require("../models/user.model");
+const jwt = require("jsonwebtoken");
 
 const registerUser = async(req, res)=>{
 
@@ -22,7 +23,19 @@ const registerUser = async(req, res)=>{
         password: password
     })
 
-    return res.status(201).json(newUser);
+    const isProduction = process.env.NODE_ENV === "PRODUCTION";
+
+    const token = jwt.sign({id: newUser}, process.env.JWT_SECRET)
+
+    res.token("token", token,{
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction? "none" : "lax",
+        maxAge: 1000 * 60 * 60 * 24 * 2,
+    })
+
+
+    return res.status(201).json({message:"User has been registered successfully"},newUser);
 }
 
 module.exports = {registerUser};
