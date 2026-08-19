@@ -6,7 +6,7 @@ cloudinary.config({
     api_secret: process.env.API_SECRET
 })
 
-async function UploadProfile(buffer, mimetype){
+async function uploadProfile(buffer, mimetype){
 
     const base64String = buffer.toString("base64");
     const dataURI = `data:${mimetype};base64,` + base64String;
@@ -21,4 +21,4 @@ console.log("Cloudinary Configured");
 return result;
 }
 
-module.exports = {UploadProfile}
+module.exports = {uploadProfile}
