@@ -6,13 +6,13 @@ const registerUser = async(req, res)=>{
 
     const {name, dateOfBirth, location, email, password } = req.body;
 
-    if(!req.files || !req.files["profile"]){
-        return res.status(400).json({message:"Profile picture is required"});
-    }
 
-    if(!name || !dateOfBirth || !location || !email || !password){
+
+    if(!name || !dateOfBirth || !location || !email || !password || !req.files || !req.files["profile"]){
         return res.status(400).json({message:"All fields are required"});
     }
+
+
 
     const userExist = await user.findOne({email});
 
