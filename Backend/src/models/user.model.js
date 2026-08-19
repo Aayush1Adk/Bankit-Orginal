@@ -2,27 +2,32 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs")
 
 const userSchema = new mongoose.Schema({
+    profile:{
+        type: String,
+        required:[true,"Profile Picture is required for Registration"],
+
+    },
     name:{
         type:String,
-        required:[true,"Name is required to create account"],
+        required:[true,"Name is required to create Registration"],
         trim:true,
         minlength:[3,"Name should be at least 3 characters"],
         maxlength:[20,"Name should be at most 20 characters"]
     },
     dateOfBirth:{
         type:Date,
-        required:[true,"Date of birth is required to create account"],
+        required:[true,"Date of birth is required for Registration"],
         trim:true
     },
     location:{
         type:String,
-        required:[true,"Location is required to create account"],
+        required:[true,"Location is required for registration"],
         trim:true,
         maxlength:[30,"Location should be at most 30 characters"]
     },
     email:{
         type:String,
-        required:[true,"Email is required to create account"],
+        required:[true,"Email is required for registration account"],
         trim:true,
         unique:true,
         lowercase:true,
@@ -30,7 +35,7 @@ const userSchema = new mongoose.Schema({
     },
     password:{
         type:String,
-        required:[true,"Password is required to create account"],
+        required:[true,"Password is required for Registration"],
         maxlength:30,
         minlength:8,
         select:false
