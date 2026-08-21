@@ -12,10 +12,6 @@ const registerUser = async(req, res)=>{
         return res.status(400).json({message:"All fields are required"});
     }
 
-    const profile = await uploadProfile(req.files["profile"].buffer, req.files["profile"].mimetype);
-    const profileUrl = profile.secure_url;
-
-
     const userExist = await user.findOne({email});
 
     if(userExist){
