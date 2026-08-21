@@ -6,11 +6,18 @@ const registerUser = async(req, res)=>{
 
     const {name, dateOfBirth, location, email, password } = req.body;
 
+    if (!req.file) {
+    return res.status(400).json({ message: "Profile image is required" });
+    }
 
-
-    if(!name || !dateOfBirth || !location || !email || !password || !req.files || !req.files["profile"]){
+    if(!name || !dateOfBirth || !location || !email || !password){
         return res.status(400).json({message:"All fields are required"});
     }
+
+    try{
+    const profile = req.file;
+
+    const profileUrl = await uploadProfile(profile.buffer, profile.mimetype);
 
     const userExist = await user.findOne({email});
 
@@ -19,19 +26,19 @@ const registerUser = async(req, res)=>{
     }
 
     const newUser = await user.create({
-        profile: profileUrl,
-        name: name,
-        dateOfBirth: dateOfBirth,
-        location: location,
-        email: email,
-        password: password
+        profile: profileUrl.secure_url,
+        name,
+        dateOfBirth,
+        location,
+        email,
+        password
     })
 
     const isProduction = process.env.NODE_ENV === "PRODUCTION";
 
-    const token = jwt.sign({id: newUser}, process.env.JWT_SECRET)
+    const token = jwt.sign({id: newUser._id}, process.env.JWT_SECRET)
 
-    res.token("token", token,{
+    res.cookie("token", token,{
         httpOnly: true,
         secure: isProduction,
         sameSite: isProduction? "none" : "lax",
@@ -39,7 +46,15 @@ const registerUser = async(req, res)=>{
     })
 
 
-    return res.status(201).json({message:"User has been registered successfully"},newUser);
+    return res.status(201).json({
+        message:"User has been registered successfully",
+        user: newUser
+    });
+    }
+    catch(err){
+        console.log(err);
+        return res.status(400).json({message:"Something went wrong"});
+    }
 }
 
 module.exports = {registerUser};

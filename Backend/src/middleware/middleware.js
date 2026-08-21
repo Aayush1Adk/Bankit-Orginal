@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user.model.js")
 
-const authMiddleware = async(req, res)=>{
+const authMiddleware = async(req, res, next)=>{
 
     const token = req.cookies.token || req.headers.authorization?.split("")[1];
 
@@ -9,9 +9,12 @@ const authMiddleware = async(req, res)=>{
         return res.status(400).json({message:"Access deined, NO TOKEN "})
     }
     try{
-        const decode = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        const user = await userModel.findOne(decode.userId)
+        const user = await userModel.findOne({_id: decoded.Id})
+        if (!user) {
+        return res.status(401).json({ message: "User not found" });
+    }
 
         req.user = user;
 

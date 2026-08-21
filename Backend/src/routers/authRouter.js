@@ -7,9 +7,9 @@ const upload = multer({
     storage: multer.memoryStorage()
 })
 
-
-
-
 const router = express.Router();
 
-router.post("/register", authMiddleware,upload.single(["profile",{maxCount:1}]),authController.registerUser);
+router.post("/register", upload.single("profile"),authController.registerUser);
+
+
+module.exports = router

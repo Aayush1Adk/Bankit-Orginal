@@ -44,7 +44,7 @@ const userSchema = new mongoose.Schema({
     timestamps:true
 });
 
-userSchema.method.calculateAge = async function(dateOfBirth){
+userSchema.methods.calculateAge = async function(dateOfBirth){
 
     const today = new Date();
     const birthday = new Date(dateOfBirth);
@@ -62,7 +62,7 @@ userSchema.method.calculateAge = async function(dateOfBirth){
 
 userSchema.pre("save", async function(next){
     
-    if(!this.isModified("password")){
+    if (!this.isModified("password")){
         return
     }
 
@@ -71,7 +71,7 @@ userSchema.pre("save", async function(next){
     return;
 })
 
-userSchema.method.comparePassword = async function(){
+userSchema.methods.comparePassword = async function(){
     
     return await bcrypt.compare(password, this.password)
 
