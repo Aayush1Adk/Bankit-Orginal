@@ -53,7 +53,7 @@ userSchema.methods.calculateAge = async function(dateOfBirth){
 
     const monthDif = today.getMonth() - birthday.getMonth();
 
-    if(monthDiff < 0 || (monthDif === 0 && today.getDate() < birthday.getDate())){
+    if(monthDif < 0 || (monthDif === 0 && today.getDate() < birthday.getDate())){
         age--;
     }
 
@@ -71,7 +71,7 @@ userSchema.pre("save", async function(next){
     return;
 })
 
-userSchema.methods.comparePassword = async function(){
+userSchema.methods.comparePassword = async function(password){
     
     return await bcrypt.compare(password, this.password)
 

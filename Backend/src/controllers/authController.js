@@ -19,7 +19,7 @@ const registerUser = async(req, res)=>{
 
     const profileUrl = await uploadProfile(profile.buffer, profile.mimetype);
 
-    const userExist = await user.findOne({email});
+    const userExist = await user.findOne({email}).select("+password");
 
     if(userExist){
         return res.status(400).json({message:"User already exists, try to login"});
@@ -52,9 +52,12 @@ const registerUser = async(req, res)=>{
     });
     }
     catch(err){
-        console.log(err);
-        return res.status(400).json({message:"Something went wrong"});
-    }
+    console.error("REGISTER ERROR:", err);
+    return res.status(500).json({
+        message: err.message,
+        error: err
+    });
+}
 }
 
 module.exports = {registerUser};
