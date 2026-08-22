@@ -19,7 +19,7 @@ const registerUser = async(req, res)=>{
 
     const profileUrl = await uploadProfile(profile.buffer, profile.mimetype);
 
-    const userExist = await user.findOne({email}).select("+password");
+    const userExist = await user.findOne({email});
 
     if(userExist){
         return res.status(400).json({message:"User already exists, try to login"});

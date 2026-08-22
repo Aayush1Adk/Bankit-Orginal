@@ -36,7 +36,6 @@ const userSchema = new mongoose.Schema({
     password:{
         type:String,
         required:[true,"Password is required for Registration"],
-        maxlength:30,
         minlength:8,
         select:false
     }   

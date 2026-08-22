@@ -1,10 +1,22 @@
+require("dotenv").config();
 const cloudinary = require('cloudinary').v2;
+
 
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
     api_key: process.env.API_KEY,
     api_secret: process.env.API_SECRET
 })
+
+cloudinary.api.ping()
+    .then((result) => {
+        console.log("CLOUDINARY PING SUCCESS:", result);
+    })
+    .catch((error) => {
+        console.error("CLOUDINARY PING FAILED:");
+        console.error(error);
+        console.error("Response:", error.response);
+    });
 
 async function uploadProfile(buffer, mimetype){
 
@@ -14,7 +26,7 @@ async function uploadProfile(buffer, mimetype){
 const result = await cloudinary.uploader.upload(dataURI, {
     public_id: "user_" + Date.now(),
     folder: "ProfilePhoto",
-    resource_type:"auto"
+    resource_type:"image"
 })
 
 console.log("Cloudinary Configured");
