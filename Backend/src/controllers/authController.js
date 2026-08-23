@@ -1,7 +1,7 @@
 const user = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 const {uploadProfile} = require("../services/cloudinary.js");
-
+const emailService = require("../services/email.service.js");
 //--------------------SIGN-UP--------------------//
 const registerUser = async(req, res)=>{
 
@@ -51,6 +51,9 @@ const registerUser = async(req, res)=>{
         message:"User has been registered successfully",
         user: newUser
     });
+
+        await emailService.sendRegistrationEmail(newUser.email, newUser.name);
+
     }
 
     catch(err){
@@ -103,6 +106,8 @@ const loginUser = async(req, res)=>{
         email: emailExist.email,
         name: emailExist.name
     })
+
+    await emailService.sendLoginEmail(emailExist.email, emailExist.name);
 
 }
 
