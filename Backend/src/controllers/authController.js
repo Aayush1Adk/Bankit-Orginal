@@ -45,12 +45,13 @@ const registerUser = async(req, res)=>{
         maxAge: 1000 * 60 * 60 * 24 * 2,
     })
 
-
+    console.log("User has been created successfully")
     return res.status(201).json({
         message:"User has been registered successfully",
         user: newUser
     });
     }
+    
     catch(err){
     console.error("REGISTER ERROR:", err);
     return res.status(500).json({

@@ -7,22 +7,18 @@ cloudinary.config({
   api_secret: process.env.API_SECRET
 });
 
-async function uploadProfile(buffer) {
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: "ProfilePhoto",
-        public_id: "user_" + Date.now(),
-        resource_type: "auto"
-      },
-      (error, result) => {
-        if (error) return reject(error);
-        resolve(result);
-      }
-    );
+async function uploadProfile(buffer, mimetype){
 
-    uploadStream.end(buffer);
-  });
+    const base64String = buffer.toString("base64");
+    const dataURI = `data:${mimetype};base64,` + base64String;
+
+const result = await cloudinary.uploader.upload(dataURI, {
+    public_id: "user_" + Date.now(),
+    folder: "ProfilePhoto",
+    resource_type:"image"
+  })
+  
+  return result;
 }
 
 module.exports = { uploadProfile };
