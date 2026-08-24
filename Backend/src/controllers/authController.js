@@ -68,6 +68,11 @@ const registerUser = async(req, res)=>{
 
     await emailService.sendOTPEmail(newUser.email, createOTP);
 
+        console.log("User has been created successfully")
+    return res.status(201).json({
+        message:"Registration successful. Please verify your email.",
+        user: newUser
+    });
 
     }
 
@@ -216,7 +221,7 @@ const verifyEmail = async(req, res)=>{
             return res.status(400).json({message: "OTP has expired"});
         }
 
-        if (emailExist.otpPurpose !== "LOGIN") {
+        if (emailExist.otpPurpose !== "EMAIL_VERIFICATION") {
             return res.status(400).json({ message: "Invalid OTP" });
         }
 
@@ -240,5 +245,5 @@ const verifyEmail = async(req, res)=>{
 
 
 
-module.exports = {registerUser, loginUser, verifyLoginOTP};
+module.exports = {registerUser, loginUser, verifyLoginOTP, verifyEmail};
 
