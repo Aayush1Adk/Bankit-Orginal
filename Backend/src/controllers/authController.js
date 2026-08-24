@@ -71,6 +71,8 @@ const loginUser = async(req, res)=>{
 
     const {email, password, otp} = req.body;
 
+    try{
+
     const emailExist = await user.findOne({email}).select("+password");
 
     if(!emailExist){
@@ -83,9 +85,9 @@ const loginUser = async(req, res)=>{
         return res.status(400).json({message:"Password is incorrect"});
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000);
+    const createOTP = Math.floor(100000 + Math.random() * 900000);
 
-        emailExist.otp = otp;
+        emailExist.otp = createOTP;
 
         emailExist.otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000);
 
@@ -94,12 +96,17 @@ const loginUser = async(req, res)=>{
         await emailExist.save();
         
 
-        await emailService.sendOTPEmail(emailExist.email, otp);
+        await emailService.sendOTPEmail(emailExist.email, createOTP);
 
-
+        console.log(createOTP)
         return res.status(200).json({
             message: "OTP sent successfully"
         });
+
+        }
+        catch(err){
+            return res.status(400).json({message:"Login Failed"});
+        }
 
 }
 
@@ -122,16 +129,17 @@ const verifyLoginOTP = async(req,res)=>{
             return res.status(400).json({message: "OTP has expired"});
         }
 
-        if(emailExist.otp !== Number(otp)){
-            return res.status(400).json({message:"OTP is incorrect"});
-        }
-
         if (emailExist.otpPurpose !== "LOGIN") {
             return res.status(400).json({ message: "Invalid OTP" });
         }
 
+        if(emailExist.otp !== Number(otp)){
+            return res.status(400).json({message:"OTP is incorrect"});
+        }
+
         emailExist.otp = null;
         emailExist.otpExpiresAt = null;
+        emailExist.otpPurpose = null;
 
         await emailExist.save();
 
@@ -192,5 +200,5 @@ async function generateOTP(){
 }
 
 
-module.exports = {registerUser, loginUser};
+module.exports = {registerUser, loginUser, verifyLoginOTP};
 

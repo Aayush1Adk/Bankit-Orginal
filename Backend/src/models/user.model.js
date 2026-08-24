@@ -35,7 +35,8 @@ const userSchema = new mongoose.Schema({
     },
     otp:{
         type:Number,
-        required:[true,"OTP is required for registration"]
+        default: null
+
     },
     otpExpiresAt: {
         type: Date,
