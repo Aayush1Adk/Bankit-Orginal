@@ -50,11 +50,24 @@ const registerUser = async(req, res)=>{
 
     console.log("User has been created successfully")
     return res.status(201).json({
-        message:"User has been registered successfully",
+        message:"Registration successful. Please verify your email.",
         user: newUser
     });
 
-        await emailService.sendRegistrationEmail(newUser.email, newUser.name);
+    await emailService.sendRegistrationEmail(newUser.email, newUser.name);
+
+    const createOTP = Math.floor(100000 + Math.random() * 900000);
+
+    newUser.otp = createOTP;
+
+    newUser.otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000);
+
+    newUser.otpPurpose = "EMAIL_VERIFICATION";
+
+    await newUser.save();
+
+    await emailService.sendOTPEmail(newUser.email, createOTP);
+
 
     }
 
@@ -195,18 +208,6 @@ const verifyEmail = async(req, res)=>{
         return res.status(400).json({message:"User does not exist"});
     }
 
-        const createOTP = Math.floor(100000 + Math.random() * 900000);
-
-        emailExist.otp = createOTP;
-
-        emailExist.otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000);
-
-        emailExist.otpPurpose = "EMAIL_VERIFICATION";
-
-        await emailExist.save();
-
-        await emailService.sendOTPEmail(emailExist.email, createOTP);
-
         if(!emailExist.otp){
             return res.status(400).json({message:"OTP not found"});
         }
@@ -223,7 +224,7 @@ const verifyEmail = async(req, res)=>{
             return res.status(400).json({message:"OTP is incorrect"});
         }
 
-        emailExist.verifiedEmail = true;
+        emailExist.isEmailVerified = true;
         emailExist.otp = null;
         emailExist.otpExpiresAt = null;
         emailExist.otpPurpose = null;
@@ -234,7 +235,6 @@ const verifyEmail = async(req, res)=>{
         message:"Email has been verified successfully",
         email: emailExist.email
         })
-
 
 }
 
