@@ -83,51 +83,92 @@ const loginUser = async(req, res)=>{
         return res.status(400).json({message:"Password is incorrect"});
     }
 
-    const payload = {
-        id: emailExist._id,
-        email: emailExist.email
-    }
-
     const otp = Math.floor(100000 + Math.random() * 900000);
 
         emailExist.otp = otp;
-        emailExist.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+        emailExist.otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000);
+
+        emailExist.otpPurpose = "LOGIN";
+
         await emailExist.save();
+        
 
         await emailService.sendOTPEmail(emailExist.email, otp);
+
 
         return res.status(200).json({
             message: "OTP sent successfully"
         });
 
-    const token = jwt.sign({payload},process.env.JWT_SECRET,{expiresIn:"3d"});
-    
-    const isProduction = process.env.NODE_ENV === "PRODUCTION";
-
-    res.cookie("token", token, {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction? "none" : "lax",
-        maxAge: 1000 * 60 * 60 * 24 * 2,
-    })
-
-    if(emailExist.otp !== Number(otp)){
-        return res.status(400).json({message:"OTP is incorrect"});
-    }
-
-    if (emailExist.otpExpiresAt < new Date()) {
-    return res.status(400).json({message: "OTP has expired"});
 }
 
-    console.log("User has been logged in successfully");
-    res.status(200).json({
-        message:"User has been logged in successfully",
-        _id: emailExist._id,
-        email: emailExist.email,
-        name: emailExist.name
-    })
+const verifyLoginOTP = async(req,res)=>{
 
-    await emailService.sendLoginEmail(emailExist.email, emailExist.name);
+    const {email, otp} = req.body;
+
+    try{
+        
+        const emailExist = await user.findOne({email});
+
+        if(!emailExist){
+            return res.status(400).json({message:"User does not exist"});
+        }
+        if(!emailExist.otp){
+            return res.status(400).json({message:"OTP not found"});
+        }
+
+        if (emailExist.otpExpiresAt < new Date()) {
+            return res.status(400).json({message: "OTP has expired"});
+        }
+
+        if(emailExist.otp !== Number(otp)){
+            return res.status(400).json({message:"OTP is incorrect"});
+        }
+
+        if (emailExist.otpPurpose !== "LOGIN") {
+            return res.status(400).json({ message: "Invalid OTP" });
+        }
+
+        emailExist.otp = null;
+        emailExist.otpExpiresAt = null;
+
+        await emailExist.save();
+
+        const payload = {
+            id: emailExist._id,
+            email: emailExist.email
+        };
+
+        const token = jwt.sign({payload},process.env.JWT_SECRET,{expiresIn:"3d"});
+
+        const isProduction = process.env.NODE_ENV === "PRODUCTION";
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction? "none" : "lax",
+            maxAge: 1000 * 60 * 60 * 24 * 2
+        })
+
+        return res.status(200).json({
+            message: "User has been logged in successfully",
+            _id: emailExist._id,
+            email: emailExist.email,
+            name: emailExist.name
+        });
+
+
+    }
+    catch(err){
+
+        console.error("LOGIN ERROR:", err);
+        return res.status(500).json({
+            message: err.message,
+            error: err
+        });
+
+    }
 
 }
 

@@ -41,6 +41,15 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
+    otpPurpose: {
+        type: String,
+        enum: [
+            "EMAIL_VERIFICATION",
+            "LOGIN",
+            "PASSWORD_RESET"
+        ],    
+        default: null
+    },
     password:{
         type:String,
         required:[true,"Password is required for Registration"],
