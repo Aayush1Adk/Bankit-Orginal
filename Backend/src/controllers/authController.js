@@ -2,6 +2,8 @@ const user = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 const {uploadProfile} = require("../services/cloudinary.js");
 const emailService = require("../services/email.service.js");
+
+
 //--------------------SIGN-UP--------------------//
 const registerUser = async(req, res)=>{
 
@@ -64,6 +66,7 @@ const registerUser = async(req, res)=>{
     });
 }
 }
+
 
 //-----------------LOGIN-----------------//
 
@@ -180,24 +183,61 @@ const verifyLoginOTP = async(req,res)=>{
 
 }
 
+//----------------verifyEmail------------------//
 
-async function generateOTP(){
+const verifyEmail = async(req, res)=>{
 
-    const emailExist = await user.findOne({email}).select("+password");
+    const {email,otp} = req.body;
+
+    const emailExist = await user.findOne({email});
 
     if(!emailExist){
         return res.status(400).json({message:"User does not exist"});
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000);
-    
-    const otpSave = await user.findOneAndUpdate({
-        otp:otp
-    });
-    return otp
+        const createOTP = Math.floor(100000 + Math.random() * 900000);
 
-    await emailService.sendOTPEmail(emailExist.email, otp);
+        emailExist.otp = createOTP;
+
+        emailExist.otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000);
+
+        emailExist.otpPurpose = "EMAIL_VERIFICATION";
+
+        await emailExist.save();
+
+        await emailService.sendOTPEmail(emailExist.email, createOTP);
+
+        if(!emailExist.otp){
+            return res.status(400).json({message:"OTP not found"});
+        }
+
+        if (emailExist.otpExpiresAt < new Date()) {
+            return res.status(400).json({message: "OTP has expired"});
+        }
+
+        if (emailExist.otpPurpose !== "LOGIN") {
+            return res.status(400).json({ message: "Invalid OTP" });
+        }
+
+        if(emailExist.otp !== Number(otp)){
+            return res.status(400).json({message:"OTP is incorrect"});
+        }
+
+        emailExist.verifiedEmail = true;
+        emailExist.otp = null;
+        emailExist.otpExpiresAt = null;
+        emailExist.otpPurpose = null;
+
+        await emailExist.save();
+
+        return res.status(201).json({
+        message:"Email has been verified successfully",
+        email: emailExist.email
+        })
+
+
 }
+
 
 
 module.exports = {registerUser, loginUser, verifyLoginOTP};
