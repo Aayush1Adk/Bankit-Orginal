@@ -69,7 +69,7 @@ const registerUser = async(req, res)=>{
 
 const loginUser = async(req, res)=>{
 
-    const {email, password} = req.body;
+    const {email, password, otp} = req.body;
 
     const emailExist = await user.findOne({email}).select("+password");
 
@@ -88,6 +88,18 @@ const loginUser = async(req, res)=>{
         email: emailExist.email
     }
 
+    const otp = Math.floor(100000 + Math.random() * 900000);
+
+        emailExist.otp = otp;
+        emailExist.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
+        await emailExist.save();
+
+        await emailService.sendOTPEmail(emailExist.email, otp);
+
+        return res.status(200).json({
+            message: "OTP sent successfully"
+        });
+
     const token = jwt.sign({payload},process.env.JWT_SECRET,{expiresIn:"3d"});
     
     const isProduction = process.env.NODE_ENV === "PRODUCTION";
@@ -98,6 +110,14 @@ const loginUser = async(req, res)=>{
         sameSite: isProduction? "none" : "lax",
         maxAge: 1000 * 60 * 60 * 24 * 2,
     })
+
+    if(emailExist.otp !== Number(otp)){
+        return res.status(400).json({message:"OTP is incorrect"});
+    }
+
+    if (emailExist.otpExpiresAt < new Date()) {
+    return res.status(400).json({message: "OTP has expired"});
+}
 
     console.log("User has been logged in successfully");
     res.status(200).json({
@@ -111,9 +131,8 @@ const loginUser = async(req, res)=>{
 
 }
 
-const forgetPassword = async(req, res)=>{
 
-    const {email, name} = req.body;
+async function generateOTP(){
 
     const emailExist = await user.findOne({email}).select("+password");
 
@@ -121,33 +140,16 @@ const forgetPassword = async(req, res)=>{
         return res.status(400).json({message:"User does not exist"});
     }
 
-    if(emailExist.name !== name){
-        return res.status(400).json({message:"Name is incorrect"});
-    }
-
-    const payload = {
-        id: emailExist._id,
-        email: emailExist.email
-    }
-
-    const token = jwt.sign({payload},process.env.JWT_SECRET,{expiresIn:"3d"});
+    const otp = Math.floor(100000 + Math.random() * 900000);
     
-    const isProduction = process.env.NODE_ENV === "PRODUCTION";
+    const otpSave = await user.findOneAndUpdate({
+        otp:otp
+    });
+    return otp
 
-    res.cookie("token", token, {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction? "none" : "lax",
-        maxAge: 1000 * 60 * 60 * 24 * 2,
-    })
-
-    const passwordReset = await user.findOneAndUpdate({email},{$set:{passwordResetToken:token}},{new:true});
-
-
-
-    console.log("User has been logged in successfully");
-
+    await emailService.sendOTPEmail(emailExist.email, otp);
 }
+
 
 module.exports = {registerUser, loginUser};
 

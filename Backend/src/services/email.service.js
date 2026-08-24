@@ -51,6 +51,9 @@ const sendEmail = async (to, subject, text, html) => {
 
 };
 
+
+
+
 async function sendRegistrationEmail(userEmail, userName) {
     const subject = 'Welcome to Bankit!';
     const text = `Hello ${userName},\n\nThank you for registering with Bankit! We're excited to have you on board.\n\nBest regards,\nThe Bankit Team`;
@@ -67,6 +70,13 @@ async function sendLoginEmail(userEmail, userName) {
     await sendEmail(userEmail, subject, text, html);
 }
 
+async function sendOTPEmail(userEmail, otp){
+  const subject = 'OTP Verification';
+  const text = `Hello ${userEmail},\n\nYour OTP for verification is: ${otp}\n\nBest regards,\nThe Bankit Team`;
+  const html = `<p>Hello,</p><p>Your OTP for verification is: ${otp}</p><p>Best regards,<br>The Bankit Team</p>`;
+
+  await sendEmail(userEmail, subject, text, html);
+}
 
 async function sendTransactionEmail(userEmail, userName, amount, toAccount) {
 
@@ -84,4 +94,4 @@ async function sendTransactionFailureEmail(userEmail, userName, amount, toAccoun
 }
 
 
-module.exports = {sendEmail, sendRegistrationEmail, sendLoginEmail, sendTransactionEmail, sendTransactionFailureEmail};
+module.exports = {sendEmail, sendRegistrationEmail, sendLoginEmail, sendOTPEmail, sendTransactionEmail, sendTransactionFailureEmail};
