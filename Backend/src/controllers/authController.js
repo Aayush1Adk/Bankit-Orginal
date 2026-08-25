@@ -235,7 +235,126 @@ const loginUser = async(req, res)=>{
 }
 
 
+//-------------forget password-----------------//
+
+const forgetPassword = async(req, res)=>{
+
+    const {email} = req.body;
+
+    try{
+
+        const emailCheck = await user.findOne({email});
+
+        if(!emailCheck){
+            return res.status(400).json({message:"User does not exist"});
+        }
+
+        if ( emailCheck.otpLastSentAt && Date.now() - emailCheck.otpLastSentAt.getTime() < 60 * 1000 ){
+            return res.status(429).json({message:"OTP can only be sent once per minute"});
+        }
 
 
-module.exports = {registerUser, loginUser, verifyEmail, sendOTP};
+        const createOTP = Math.floor(100000 + Math.random() * 900000);
+
+        emailCheck.otp = createOTP;
+
+        emailCheck.otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000);
+
+        emailCheck.otpLastSentAt = new Date();
+
+        emailCheck.otpPurpose = "PASSWORD_RESET";
+
+        await emailCheck.save();
+
+
+        await emailService.sendOTPEmail(emailCheck.email, createOTP);
+
+
+        return res.status(200).json({
+            message: "Check your email for the OTP, it will expire in 2 minutes"
+        });
+
+
+
+    }
+    catch(err){
+
+        console.error("FORGET PASSWORD ERROR:", err);
+        return res.status(500).json({
+            message: "An error occurred while processing your request",
+            error: err
+        });
+    }
+    }
+
+    const resetPassword = async(req, res)=>{
+
+        const {email, otp, newPassword} = req.body;
+
+        try{
+
+        if(!email || !otp || !newPassword) {
+            return res.status(400).json({message:"All fields are required"});
+        }
+
+        const emailExist = await user.findOne({email}).select("+password");
+
+        if(!emailExist){
+            return res.status(400).json({message:"User does not exist"});
+        }
+        
+        if(!emailExist.otp){
+            return res.status(400).json({message:"OTP not found"});
+        }
+
+        if (emailExist.otpExpiresAt < new Date()) {
+            return res.status(400).json({message: "OTP has expired"});
+        }
+
+        if (emailExist.otpPurpose !== "PASSWORD_RESET") {
+            return res.status(400).json({ message: "Invalid OTP" });
+        }
+
+        if(emailExist.otp !== Number(otp)){
+            return res.status(400).json({message:"OTP is incorrect"});
+        }
+
+        emailExist.password = newPassword;
+        emailExist.otp = null;
+        emailExist.otpExpiresAt = null;
+        emailExist.otpPurpose = null;
+
+        await emailExist.save();
+
+        return res.status(200).json({
+            message: "Password has been reset successfully"
+        });
+        }
+        catch(err){
+            return res.status(500).json({
+                message: "An error occurred while resetting the password",
+                error: err
+            });
+        }
+    }
+
+    //---------------logout-----------------//
+
+    const logoutUser = async (req, res) => {
+    const isProduction = process.env.NODE_ENV === "PRODUCTION";
+
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax"
+    });
+
+    return res.status(200).json({
+        message: "User logged out successfully"
+    });
+};
+
+
+
+module.exports = {registerUser, loginUser, verifyEmail, sendOTP, forgetPassword, resetPassword, logoutUser};
 
