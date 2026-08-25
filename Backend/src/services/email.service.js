@@ -54,10 +54,10 @@ const sendEmail = async (to, subject, text, html) => {
 
 
 
-async function sendRegistrationEmail(userEmail, userName) {
+async function sendRegistrationEmail(userEmail, userName, otp) {
     const subject = 'Welcome to Bankit!';
-    const text = `Hello ${userName},\n\nThank you for registering with Bankit! We're excited to have you on board.\n\nBest regards,\nThe Bankit Team`;
-    const html = `<p>Hello ${userName},</p><p>Thank you for registering with <strong>Bankit</strong>! We're excited to have you on board.</p><p>Best regards,<br>The Bankit Team</p>`;
+    const text = `Hello ${userName},\n\nThank you for registering with Bankit! We're excited to have you on board.\n\nYour OTP for verification is: ${otp}\n\nBest regards,\nThe Bankit Team`;
+    const html = `<p>Hello ${userName},</p><p>Thank you for registering with <strong>Bankit</strong>! We're excited to have you on board.</p><p>Your OTP for verification is: ${otp}</p><p>Best regards,<br>The Bankit Team</p>`;
 
     await sendEmail(userEmail, subject, text, html);
 }
@@ -91,6 +91,7 @@ async function sendTransactionFailureEmail(userEmail, userName, amount, toAccoun
   const subject = 'Transaction Failed';
   const text = `Hello ${userName},\n\nYour transaction of $${amount} to ${toAccount} has failed.\n\nBest regards,\nThe Bankit Team`;
   const html = `<p>Hello ${userName},</p><p>Your transaction of $${amount} to ${toAccount} has failed.</p><p>Best regards,<br>The Bankit Team</p>`;
+  await sendEmail(userEmail, subject, text, html);
 }
 
 

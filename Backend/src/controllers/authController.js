@@ -37,19 +37,21 @@ const registerUser = async(req, res)=>{
         password
     })
 
-    await emailService.sendRegistrationEmail(newUser.email, newUser.name);
+    
 
-      const createOTP = Math.floor(100000 + Math.random() * 900000);
+    const createOTP = Math.floor(100000 + Math.random() * 900000);
 
     newUser.otp = createOTP;
 
     newUser.otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000);
 
+    newUser.otpLastSentAt = new Date();
+
     newUser.otpPurpose = "EMAIL_VERIFICATION";
 
     await newUser.save();
 
-    await emailService.sendOTPEmail(newUser.email, createOTP);
+    await emailService.sendRegistrationEmail(newUser.email, newUser.name, newUser.otp);
 
 
         console.log("User has been created successfully")
@@ -73,7 +75,9 @@ const registerUser = async(req, res)=>{
 
 const sendOTP = async(req, res)=>{
 
-    const{email, otp} = req.body;
+    const{email } = req.body;
+
+    try{
 
     const newUser = await user.findOne({email});
 
@@ -81,11 +85,22 @@ const sendOTP = async(req, res)=>{
         return res.status(400).json({message:"User does not exist"});
     }
 
+    if(newUser.isEmailVerified){
+        return res.status(400).json({message:"Email is already verified"});
+    }
+
+    if ( newUser.otpLastSentAt && Date.now() - newUser.otpLastSentAt.getTime() < 60 * 1000 ){
+        return res.status(429).json({message:"OTP can only be sent once per minute"});
+    }
+
+
     const createOTP = Math.floor(100000 + Math.random() * 900000);
 
     newUser.otp = createOTP;
 
     newUser.otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000);
+
+    newUser.otpLastSentAt = new Date();
 
     newUser.otpPurpose = "EMAIL_VERIFICATION";
 
@@ -94,6 +109,14 @@ const sendOTP = async(req, res)=>{
     await emailService.sendOTPEmail(newUser.email, createOTP);
 
     return res.status(200).json("Check you email for the OTP, it will expire in 2 minutes");
+}
+        catch (err) {
+        console.error("SEND OTP ERROR:", err);
+
+        return res.status(500).json({
+            message: "Failed to send OTP"
+        });
+}
 }
 
 
@@ -136,7 +159,7 @@ const verifyEmail = async(req, res)=>{
 
     const isProduction = process.env.NODE_ENV === "PRODUCTION";
 
-    const token = jwt.sign({id: emailExist._id}, process.env.JWT_SECRET)
+    const token = jwt.sign({id: emailExist._id, email: emailExist.email }, process.env.JWT_SECRET,{ expiresIn: "3d" })
 
     res.cookie("token", token,{
         httpOnly: true,
@@ -182,7 +205,7 @@ const loginUser = async(req, res)=>{
         return res.status(400).json({message:"Password is incorrect"});
     }
 
-        const token = jwt.sign({ id: emailExist._id,email: emailExist.email } ,process.env.JWT_SECRET,{expiresIn:"3d"});
+        const token = jwt.sign({ id: emailExist._id, email: emailExist.email } ,process.env.JWT_SECRET,{expiresIn:"3d"});
 
         const isProduction = process.env.NODE_ENV === "PRODUCTION";
 
@@ -193,6 +216,8 @@ const loginUser = async(req, res)=>{
             maxAge: 1000 * 60 * 60 * 24 * 3
         })
 
+        await emailService.sendLoginEmail(emailExist.email, emailExist.name);
+
         return res.status(200).json({
             message: "User has been logged in successfully",
             _id: emailExist._id,
@@ -200,7 +225,7 @@ const loginUser = async(req, res)=>{
             name: emailExist.name
         });
 
-        await emailService.sendLoginEmail(emailExist.email, emailExist.name);
+        
 
         }
         catch(err){
