@@ -37,26 +37,9 @@ const registerUser = async(req, res)=>{
         password
     })
 
-    const isProduction = process.env.NODE_ENV === "PRODUCTION";
-
-    const token = jwt.sign({id: newUser._id}, process.env.JWT_SECRET)
-
-    res.cookie("token", token,{
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction? "none" : "lax",
-        maxAge: 1000 * 60 * 60 * 24 * 2,
-    })
-
-    console.log("User has been created successfully")
-    return res.status(201).json({
-        message:"Registration successful. Please verify your email.",
-        user: newUser
-    });
-
     await emailService.sendRegistrationEmail(newUser.email, newUser.name);
 
-    const createOTP = Math.floor(100000 + Math.random() * 900000);
+      const createOTP = Math.floor(100000 + Math.random() * 900000);
 
     newUser.otp = createOTP;
 
@@ -68,10 +51,11 @@ const registerUser = async(req, res)=>{
 
     await emailService.sendOTPEmail(newUser.email, createOTP);
 
+
         console.log("User has been created successfully")
     return res.status(201).json({
         message:"Registration successful. Please verify your email.",
-        user: newUser
+        email: newUser.email
     });
 
     }
@@ -85,127 +69,41 @@ const registerUser = async(req, res)=>{
 }
 }
 
+//------------------sendOTP-----------------//
 
-//-----------------LOGIN-----------------//
+const sendOTP = async(req, res)=>{
 
-const loginUser = async(req, res)=>{
+    const{email, otp} = req.body;
 
-    const {email, password, otp} = req.body;
+    const newUser = await user.findOne({email});
 
-    try{
-
-    const emailExist = await user.findOne({email}).select("+password");
-
-    if(!emailExist){
+    if(!newUser){
         return res.status(400).json({message:"User does not exist"});
-    }
-
-    const isValidPassword = await emailExist.comparePassword(password);
-
-    if(!isValidPassword){
-        return res.status(400).json({message:"Password is incorrect"});
     }
 
     const createOTP = Math.floor(100000 + Math.random() * 900000);
 
-        emailExist.otp = createOTP;
+    newUser.otp = createOTP;
 
-        emailExist.otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000);
+    newUser.otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000);
 
-        emailExist.otpPurpose = "LOGIN";
+    newUser.otpPurpose = "EMAIL_VERIFICATION";
 
-        await emailExist.save();
-        
+    await newUser.save();
 
-        await emailService.sendOTPEmail(emailExist.email, createOTP);
+    await emailService.sendOTPEmail(newUser.email, createOTP);
 
-        console.log(createOTP)
-        return res.status(200).json({
-            message: "OTP sent successfully"
-        });
-
-        }
-        catch(err){
-            return res.status(400).json({message:"Login Failed"});
-        }
-
+    return res.status(200).json("Check you email for the OTP, it will expire in 2 minutes");
 }
 
-const verifyLoginOTP = async(req,res)=>{
-
-    const {email, otp} = req.body;
-
-    try{
-        
-        const emailExist = await user.findOne({email});
-
-        if(!emailExist){
-            return res.status(400).json({message:"User does not exist"});
-        }
-        if(!emailExist.otp){
-            return res.status(400).json({message:"OTP not found"});
-        }
-
-        if (emailExist.otpExpiresAt < new Date()) {
-            return res.status(400).json({message: "OTP has expired"});
-        }
-
-        if (emailExist.otpPurpose !== "LOGIN") {
-            return res.status(400).json({ message: "Invalid OTP" });
-        }
-
-        if(emailExist.otp !== Number(otp)){
-            return res.status(400).json({message:"OTP is incorrect"});
-        }
-
-        emailExist.otp = null;
-        emailExist.otpExpiresAt = null;
-        emailExist.otpPurpose = null;
-
-        await emailExist.save();
-
-        const payload = {
-            id: emailExist._id,
-            email: emailExist.email
-        };
-
-        const token = jwt.sign({payload},process.env.JWT_SECRET,{expiresIn:"3d"});
-
-        const isProduction = process.env.NODE_ENV === "PRODUCTION";
-
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction? "none" : "lax",
-            maxAge: 1000 * 60 * 60 * 24 * 2
-        })
-
-        return res.status(200).json({
-            message: "User has been logged in successfully",
-            _id: emailExist._id,
-            email: emailExist.email,
-            name: emailExist.name
-        });
-
-
-    }
-    catch(err){
-
-        console.error("LOGIN ERROR:", err);
-        return res.status(500).json({
-            message: err.message,
-            error: err
-        });
-
-    }
-
-}
 
 //----------------verifyEmail------------------//
 
 const verifyEmail = async(req, res)=>{
 
     const {email,otp} = req.body;
+
+    try{
 
     const emailExist = await user.findOne({email});
 
@@ -236,14 +134,83 @@ const verifyEmail = async(req, res)=>{
 
         await emailExist.save();
 
+    const isProduction = process.env.NODE_ENV === "PRODUCTION";
+
+    const token = jwt.sign({id: emailExist._id}, process.env.JWT_SECRET)
+
+    res.cookie("token", token,{
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction? "none" : "lax",
+        maxAge: 1000 * 60 * 60 * 24 * 3,
+    })
+
         return res.status(201).json({
         message:"Email has been verified successfully",
         email: emailExist.email
         })
+}
+
+    catch(err){
+        console.error("EMAIL VERIFICATION ERROR:", err);
+        return res.status(500).json({
+            message: err.message,
+            error: err
+        });
+    }
+}
+
+
+
+//-----------------LOGIN-----------------//
+
+const loginUser = async(req, res)=>{
+
+    const {email, password} = req.body;
+
+    try{
+
+    const emailExist = await user.findOne({email}).select("+password");
+
+    if(!emailExist){
+        return res.status(400).json({message:"User does not exist"});
+    }
+
+    const isValidPassword = await emailExist.comparePassword(password);
+
+    if(!isValidPassword){
+        return res.status(400).json({message:"Password is incorrect"});
+    }
+
+        const token = jwt.sign({ id: emailExist._id,email: emailExist.email } ,process.env.JWT_SECRET,{expiresIn:"3d"});
+
+        const isProduction = process.env.NODE_ENV === "PRODUCTION";
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction? "none" : "lax",
+            maxAge: 1000 * 60 * 60 * 24 * 3
+        })
+
+        return res.status(200).json({
+            message: "User has been logged in successfully",
+            _id: emailExist._id,
+            email: emailExist.email,
+            name: emailExist.name
+        });
+
+        await emailService.sendLoginEmail(emailExist.email, emailExist.name);
+
+        }
+        catch(err){
+            return res.status(400).json({message:"Login Failed"});
+        }
 
 }
 
 
 
-module.exports = {registerUser, loginUser, verifyLoginOTP, verifyEmail};
+
+module.exports = {registerUser, loginUser, verifyEmail, sendOTP};
 

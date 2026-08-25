@@ -46,7 +46,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: [
             "EMAIL_VERIFICATION",
-            "LOGIN",
             "PASSWORD_RESET"
         ],    
         default: null

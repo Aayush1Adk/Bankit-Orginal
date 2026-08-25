@@ -11,8 +11,8 @@ const router = express.Router();
 
 router.post("/register", upload.single("profile"),authController.registerUser);
 router.post("/register/verifyEmail", authController.verifyEmail);
-router.post("/login", authController.loginUser, authMiddleware);
-router.post("/login/verifyOTP", authController.verifyLoginOTP,authMiddleware);
+router.post("/register/sendOTP", authController.sendOTP);
+router.post("/login", authController.loginUser);
 
 
 module.exports = router
