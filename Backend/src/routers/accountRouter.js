@@ -1,7 +1,7 @@
-const accountCreation = require("../controllers/accountController.js");
-const { authMiddleware } = require("../middleware/middleware.js");
 const express = require("express");
 const multer = require("multer")
+const accountController = require("../controllers/accountController.js");
+const authMiddleware = require("../middleware/middleware.js");
 
 const upload = multer({
     storage: multer.memoryStorage()
@@ -9,6 +9,6 @@ const upload = multer({
 
 const router = express.Router();
 
-router.post("/create", upload.single("profile"), accountCreation.accountCreation, authMiddleware);
+router.post("/create", authMiddleware, upload.single("profile"), accountController.accountCreation);
 
 module.exports = router

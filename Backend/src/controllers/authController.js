@@ -8,7 +8,7 @@ const registerUser = async(req, res)=>{
 
     const { email, password } = req.body;
 
-    if(!name || !dateOfBirth || !location || !email || !password){
+    if(!email || !password){
         return res.status(400).json({message:"All fields are required"});
     }
 
@@ -42,9 +42,10 @@ const registerUser = async(req, res)=>{
     await emailService.sendRegistrationEmail(newUser.email, newUser.name, newUser.otp);
 
 
-        console.log("User has been created successfully")
+        console.log(`User has been created successfully. OTP is: ${createOTP}`)
     return res.status(201).json({
         message:"Registration successful. Please verify your email.",
+        email: newUser._id,
         email: newUser.email
     });
 

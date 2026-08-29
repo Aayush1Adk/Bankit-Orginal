@@ -39,7 +39,6 @@ const accountSchema = new mongoose.Schema({
     },
     status:{
         type: String,
-        required:[true, "Status is required for account creation"],
         enum:{
             values:["ACTIVE", "INACTIVE","FROZEN"],
             message:`Status must be either ACTIVE, INACTIVE or FROZEN`
@@ -53,7 +52,7 @@ const accountSchema = new mongoose.Schema({
 accountSchema.index({user: 1, name: 1 ,status: 1}); 
 
 
-userSchema.methods.calculateAge = function(dateOfBirth) {
+accountSchema.methods.calculateAge = function(dateOfBirth) {
     const today = new Date();
     const birthday = dateOfBirth ? new Date(dateOfBirth) : new Date(this.dateOfBirth);
 
