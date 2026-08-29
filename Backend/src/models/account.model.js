@@ -49,7 +49,7 @@ const accountSchema = new mongoose.Schema({
     timestamps:true
 })
 
-accountSchema.index({user: 1, name: 1 ,status: 1}); 
+accountSchema.index({userId: 1, name: 1 ,status: 1}); 
 
 
 accountSchema.methods.calculateAge = function(dateOfBirth) {

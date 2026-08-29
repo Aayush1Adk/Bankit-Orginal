@@ -96,6 +96,15 @@ const sendOTP = async(req, res)=>{
     await newUser.save();
 
     await emailService.sendOTPEmail(newUser.email, createOTP);
+    
+    if (emailExist.otpExpiresAt < new Date()) {
+        emailExist.otp = null;
+        emailExist.otpExpiresAt = null;
+        emailExist.otpPurpose = null;
+
+        await emailExist.save();
+            return res.status(400).json({message: "OTP has expired"});
+        }
 
     return res.status(200).json("Check you email for the OTP, it will expire in 2 minutes");
 }

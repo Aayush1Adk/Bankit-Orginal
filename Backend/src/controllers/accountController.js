@@ -15,16 +15,20 @@ const accountCreation = async(req, res)=>{
     return res.status(400).json({ message: "Profile image is required" });
     }
 
-    const userExist = await account.findOne({userId});
+    const userExist = await account.findOne({ userId });
 
-    if(userExist){
-        return res.status(400).json({message:"Account already exists for this user"});
+    if (userExist) {
+        return res.status(400).json({ message: "Account already exists for this user" });
     }
 
-    const verified = await user.findOne({userId});
+    const verified = await user.findById(userId);
 
-    if(verified.isEmailVerified !== true){
-        return res.status(400).json({message:"User is not verified, please verify your email first"});
+    if (!verified) {
+        return res.status(400).json({ message: "User does not exist" });
+    }
+
+    if (verified.isEmailVerified !== true) {
+        return res.status(400).json({ message: "User is not verified, please verify your email first" });
     }
 
     const profileUrl = await uploadProfile(profile.buffer, profile.mimetype);
