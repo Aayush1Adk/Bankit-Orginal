@@ -1,6 +1,5 @@
 const user = require("../models/user.model");
 const jwt = require("jsonwebtoken");
-const {uploadProfile} = require("../services/cloudinary.js");
 const emailService = require("../services/email.service.js");
 
 
