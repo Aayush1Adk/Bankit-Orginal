@@ -50,6 +50,8 @@ const accountSchema = new mongoose.Schema({
     timestamps:true
 })
 
+accountSchema.index({user: 1, name: 1 ,status: 1}); 
+
 
 userSchema.methods.calculateAge = function(dateOfBirth) {
     const today = new Date();

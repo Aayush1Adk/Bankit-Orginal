@@ -6,20 +6,13 @@ const emailService = require("../services/email.service.js");
 //--------------------SIGN-UP--------------------//
 const registerUser = async(req, res)=>{
 
-    const {name, dateOfBirth, location, email, password } = req.body;
-
-    if (!req.file) {
-    return res.status(400).json({ message: "Profile image is required" });
-    }
+    const { email, password } = req.body;
 
     if(!name || !dateOfBirth || !location || !email || !password){
         return res.status(400).json({message:"All fields are required"});
     }
 
     try{
-    const profile = req.file;
-
-    const profileUrl = await uploadProfile(profile.buffer, profile.mimetype);
 
     const userExist = await user.findOne({email});
 
@@ -28,10 +21,6 @@ const registerUser = async(req, res)=>{
     }
 
     const newUser = await user.create({
-        profile: profileUrl.secure_url,
-        name,
-        dateOfBirth,
-        location,
         email,
         password
     })
