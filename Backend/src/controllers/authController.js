@@ -44,8 +44,8 @@ const registerUser = async(req, res)=>{
 
         console.log(`User has been created successfully. OTP is: ${createOTP}`)
     return res.status(201).json({
-        message:"Registration successful. Please verify your email.",
-        email: newUser._id,
+        message: "Registration successful. Please verify your email.",
+        userId: newUser._id,
         email: newUser.email
     });
 

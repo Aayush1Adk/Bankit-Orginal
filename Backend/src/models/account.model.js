@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const accountSchema = new mongoose.Schema({
 
-    user:{
+    userId:{
         type: mongoose.Schema.Types.ObjectId,
         required:[true, "User is required for account creation"],
         ref:"user"
