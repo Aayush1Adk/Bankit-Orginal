@@ -36,5 +36,19 @@ const accountCreation = async(req, res)=>{
     return res.status(200).json({message:"Account created successfully", newAccount});
 }
 
+const getAccount = async(req, res)=>{
 
-module.exports = { accountCreation }
+    const userId = req.user._id;
+
+    const accountExist = await account.findOne({ userId });
+
+    if(!accountExist){
+        return res.status(404).json({message:"Account does not exist for this user"});
+    }
+
+    return res.status(200).json({message:"Account fetched successfully", accountExist});
+}
+
+
+
+module.exports = { accountCreation, getAccount }

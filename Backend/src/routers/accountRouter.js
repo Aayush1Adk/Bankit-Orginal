@@ -10,5 +10,6 @@ const upload = multer({
 const router = express.Router();
 
 router.post("/create", authMiddleware, upload.single("profile"), accountController.accountCreation);
+router.get("/get", authMiddleware, accountController.getAccount);
 
 module.exports = router

@@ -20,8 +20,6 @@ const authMiddleware = async(req, res, next)=>{
     if (!user.isEmailVerified) {
         return res.status(403).json({ message: "User is not verified, please verify your email first"});
     }
-
-
         req.user = user;
 
         next();
