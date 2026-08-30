@@ -4,7 +4,8 @@ const {uploadProfile} = require("../services/cloudinary.js");
 
 const accountCreation = async(req, res)=>{
 
-    const {userId, name, dateOfBirth, location, gender} = req.body;
+    const userId = req.user._id;
+    const {name, dateOfBirth, location, gender} = req.body;
     const profile = req.file;
 
     if(!userId || !name || !dateOfBirth || !location || !gender){
@@ -19,16 +20,6 @@ const accountCreation = async(req, res)=>{
 
     if (userExist) {
         return res.status(400).json({ message: "Account already exists for this user" });
-    }
-
-    const verified = await user.findById(userId);
-
-    if (!verified) {
-        return res.status(400).json({ message: "User does not exist" });
-    }
-
-    if (verified.isEmailVerified !== true) {
-        return res.status(400).json({ message: "User is not verified, please verify your email first" });
     }
 
     const profileUrl = await uploadProfile(profile.buffer, profile.mimetype);

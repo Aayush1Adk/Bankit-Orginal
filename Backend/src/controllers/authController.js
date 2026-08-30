@@ -23,9 +23,8 @@ const registerUser = async(req, res)=>{
     const newUser = await user.create({
         email,
         password
-    })
 
-    
+    })
 
     const createOTP = Math.floor(100000 + Math.random() * 900000);
 
@@ -60,62 +59,6 @@ const registerUser = async(req, res)=>{
 }
 }
 
-//------------------sendOTP-----------------//
-
-const sendOTP = async(req, res)=>{
-
-    const{email } = req.body;
-
-    try{
-
-    const newUser = await user.findOne({email});
-
-    if(!newUser){
-        return res.status(400).json({message:"User does not exist"});
-    }
-
-    if(newUser.isEmailVerified){
-        return res.status(400).json({message:"Email is already verified"});
-    }
-
-    if ( newUser.otpLastSentAt && Date.now() - newUser.otpLastSentAt.getTime() < 60 * 1000 ){
-        return res.status(429).json({message:"OTP can only be sent once per minute"});
-    }
-
-
-    const createOTP = Math.floor(100000 + Math.random() * 900000);
-
-    newUser.otp = createOTP;
-
-    newUser.otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000);
-
-    newUser.otpLastSentAt = new Date();
-
-    newUser.otpPurpose = "EMAIL_VERIFICATION";
-
-    await newUser.save();
-
-    await emailService.sendOTPEmail(newUser.email, createOTP);
-    
-    if (emailExist.otpExpiresAt < new Date()) {
-        emailExist.otp = null;
-        emailExist.otpExpiresAt = null;
-        emailExist.otpPurpose = null;
-
-        await emailExist.save();
-            return res.status(400).json({message: "OTP has expired"});
-        }
-
-    return res.status(200).json("Check you email for the OTP, it will expire in 2 minutes");
-}
-        catch (err) {
-        console.error("SEND OTP ERROR:", err);
-
-        return res.status(500).json({
-            message: "Failed to send OTP"
-        });
-}
-}
 
 
 //----------------verifyEmail------------------//
@@ -137,6 +80,10 @@ const verifyEmail = async(req, res)=>{
         }
 
         if (emailExist.otpExpiresAt < new Date()) {
+            emailExist.otp = null;
+            emailExist.otpExpiresAt = null;
+            emailExist.otpPurpose = null;
+            await emailExist.save();
             return res.status(400).json({message: "OTP has expired"});
         }
 
@@ -179,6 +126,56 @@ const verifyEmail = async(req, res)=>{
             error: err
         });
     }
+}
+
+
+//------------------sendOTP-----------------//
+
+const sendOTP = async(req, res)=>{
+
+    const{email} = req.body;
+
+    try{
+
+    const newUser = await user.findOne({email});
+
+    if(!newUser){
+        return res.status(400).json({message:"User does not exist"});
+    }
+
+    if(newUser.isEmailVerified){
+        return res.status(400).json({message:"Email is already verified"});
+    }
+
+    if ( newUser.otpLastSentAt && Date.now() - newUser.otpLastSentAt.getTime() < 60 * 1000 ){
+        return res.status(429).json({message:"OTP can only be sent once per minute"});
+    }
+
+
+    const createOTP = Math.floor(100000 + Math.random() * 900000);
+
+    newUser.otp = createOTP;
+
+    newUser.otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000);
+
+    newUser.otpLastSentAt = new Date();
+
+    newUser.otpPurpose = "EMAIL_VERIFICATION";
+
+    await newUser.save();
+
+    await emailService.sendOTPEmail(newUser.email, createOTP);
+    
+
+    return res.status(200).json("Check you email for the OTP, it will expire in 2 minutes");
+}
+        catch (err) {
+        console.error("SEND OTP ERROR:", err);
+
+        return res.status(500).json({
+            message: "Failed to send OTP"
+        });
+}
 }
 
 

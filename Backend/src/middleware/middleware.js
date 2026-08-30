@@ -12,9 +12,15 @@ const authMiddleware = async(req, res, next)=>{
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         const user = await userModel.findOne({_id: decoded.id})
-        if (!user) {
+
+    if (!user) {
         return res.status(401).json({ message: "User not found" });
     }
+
+    if (!user.isEmailVerified) {
+        return res.status(403).json({ message: "User is not verified, please verify your email first"});
+    }
+
 
         req.user = user;
 
