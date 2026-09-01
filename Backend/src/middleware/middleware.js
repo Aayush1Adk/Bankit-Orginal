@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user.model.js")
+const transactionModel = require("../models/transaction.model.js");
 
 const authMiddleware = async(req, res, next)=>{
 
@@ -32,4 +33,35 @@ const authMiddleware = async(req, res, next)=>{
     }
 }
 
-module.exports = authMiddleware
+const transactionMiddleware = async(req, res, next)=>{
+
+    const {fromAccount, toAccount, amount, idempotencyKey} = req.body;
+    
+
+    if(!fromAccount || !toAccount || !amount || !idempotencyKey){
+        return res.status(400).json({message:"All fields are required"});
+    }
+
+    if(fromAccount === toAccount){
+        return res.status(400).json({message:"From account and to account cannot be same"});
+    }
+
+    if(!mongoose.Type.ObjectId.isValid(fromAccount) || !mongoose.Type.ObjectId.isValid(toAccount)){
+        return res.status(400).json({message:"Invalid account id"});
+    }
+
+    if(typeof amount !== "number"){
+        return res.status(400).json({message:"Amount must be a number"});
+    }
+
+    if(amount <= 0 || isNaN(amount) || amount > 100000000){
+        return res.status(400).json({message:"Amount must be greater than 0"});
+    }
+
+    next();
+
+}
+
+
+
+module.exports = {authMiddleware, transactionMiddleware }
