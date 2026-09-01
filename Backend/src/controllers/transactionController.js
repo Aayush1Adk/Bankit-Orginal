@@ -95,7 +95,6 @@ const createTransaction = async (req, res) => {
     finally {
     await session.endSession();
 }
-
-
-
 }
+
+module.exports = {createTransaction}

@@ -1,5 +1,6 @@
 const account = require("../models/account.model.js");
 const user = require("../models/user.model.js");
+const emailService = require("../services/email.service.js");
 const {uploadProfile} = require("../services/cloudinary.js");
 
 const accountCreation = async(req, res)=>{
@@ -35,7 +36,7 @@ const accountCreation = async(req, res)=>{
 
     return res.status(200).json({message:"Account created successfully", newAccount});
 
-    
+    await emailService.sendAccountCreationEmail(req.user.email, req.user.name, newAccount.accountNumber);
 
 
 }
