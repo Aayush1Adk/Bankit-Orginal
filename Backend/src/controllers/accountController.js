@@ -73,4 +73,4 @@ const getBalance = async(req, res)=>{
 }
 
 
-module.exports = { accountCreation, getAccount }
+module.exports = { accountCreation, getAccount, getBalance }
