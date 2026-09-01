@@ -101,4 +101,4 @@ async function sendAccountCreationEmail(userEmail, userName, accountNumber) {
   await sendEmail(userEmail, subject, text, html);
 }
 
-module.exports = {sendEmail, sendRegistrationEmail, sendLoginEmail, sendOTPEmail, sendTransactionEmail, sendTransactionFailureEmail};
+module.exports = {sendEmail, sendRegistrationEmail, sendLoginEmail, sendOTPEmail, sendTransactionEmail, sendTransactionFailureEmail, sendAccountCreationEmail};

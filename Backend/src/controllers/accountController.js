@@ -54,6 +54,23 @@ const getAccount = async(req, res)=>{
     return res.status(200).json({message:"Account fetched successfully", accountExist});
 }
 
+const getBalance = async(req, res)=>{
+
+    const {accountId} = req.params;
+
+    const amount = await accountModel.findOne({
+        _id: amountId,
+        user: req.user._id
+    })
+
+    if(!amount){
+        return res.status(404).json({message:"Account does not exist for this user"});
+    }
+
+    const balance = await account.getBalance()
+
+    res.status(404).json({message:"Balance fetched successfully", balance});
+}
 
 
 module.exports = { accountCreation, getAccount }
