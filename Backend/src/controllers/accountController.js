@@ -34,6 +34,10 @@ const accountCreation = async(req, res)=>{
     });
 
     return res.status(200).json({message:"Account created successfully", newAccount});
+
+    
+
+
 }
 
 const getAccount = async(req, res)=>{

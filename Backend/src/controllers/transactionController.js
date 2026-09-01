@@ -41,5 +41,61 @@ const createTransaction = async (req, res) => {
         }
     }
 
+    try{
+
+    const session = await mongoose.startSession()
+
+    session.startTransaction();
+
+    const transaction = await transactionModel.create({
+        fromAccount,
+        toAccount,
+        amount,
+        idempotencyKey,
+        status:"PENDING"},
+        {session}
+    );
+
+    const debitLedgerEntry = await ledgerModel.create({
+        account: fromAccount,
+        amount: amount,
+        transaction: transaction._id,
+        type: "DEBIT"},
+    {session}
+    );
+
+    const creditLederEntry = await ledgerModel.create({
+        account: toAccount,
+        amount: amount,
+        transaction: transaction._id,
+        type: "CREDIT"},
+    {session}
+    );
+
+    await transactionModel.updateOne(
+        { _id: transaction._id },
+        { status: "COMPLETED" },
+        { session }
+    );
+
+    await session.commitTransaction();
+
+
+    await emailService.sendTransactionSuccessEmail(fromAccountExist.email, fromAccountExist.name, amount, toAccountExist.name);
+
+    }
+
+    catch(err){
+        await session.abortTransaction();
+        return res.status(400).json({message:"Transaction failed"})
+
+        await emailService.sendTransactionFailureEmail(fromAccountExist.email, fromAccountExist.name, amount, toAccountExist.name);
+    }
+
+    finally {
+    await session.endSession();
+}
+
+
 
 }
