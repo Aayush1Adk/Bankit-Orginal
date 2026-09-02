@@ -15,7 +15,7 @@ const createTransaction = async (req, res) => {
         return res.status(400).json({message:"Account does not exist"})
     } 
 
-    if(fromAccount.status !== "ACTIVE" || toAccount.status !== "ACTIVE"){
+    if(fromAccountExist.status !== "ACTIVE" || toAccountExist.status !== "ACTIVE"){
         return res.status(400).json({message:"Account is not active"})
     }
 
@@ -43,10 +43,8 @@ const createTransaction = async (req, res) => {
         }
     }
 
-    try{
-
     const session = await mongoose.startSession()
-
+    try{
     session.startTransaction();
 
     const transaction = await transactionModel.create({
@@ -79,24 +77,21 @@ const createTransaction = async (req, res) => {
         { status: "COMPLETED" },
         { session }
     );
-
+    
+    await emailService.sendTransactionEmail(fromAccountExist.email, fromAccountExist.name, amount, toAccountExist.name)
+    
     await session.commitTransaction();
-
-
-    await emailService.sendTransactionSuccessEmail(fromAccountExist.email, fromAccountExist.name, amount, toAccountExist.name);
-
     }
 
     catch(err){
+        await emailService.sendTransactionFailureEmail(fromAccountExist.email, fromAccountExist.name, amount, toAccountExist.name);
         await session.abortTransaction();
         return res.status(400).json({message:"Transaction failed"})
-
-        await emailService.sendTransactionFailureEmail(fromAccountExist.email, fromAccountExist.name, amount, toAccountExist.name);
     }
 
     finally {
     await session.endSession();
-}
+    }
 }
 
 module.exports = {createTransaction}

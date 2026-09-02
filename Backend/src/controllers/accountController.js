@@ -34,11 +34,9 @@ const accountCreation = async(req, res)=>{
         gender
     });
 
+    await emailService.sendAccountCreationEmail(req.user.email, req.user.name, newAccount.userId);
+
     return res.status(200).json({message:"Account created successfully", newAccount});
-
-    await emailService.sendAccountCreationEmail(req.user.email, req.user.name, newAccount.accountNumber);
-
-
 }
 
 const getAccount = async(req, res)=>{
