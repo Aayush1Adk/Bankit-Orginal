@@ -34,7 +34,7 @@ const accountCreation = async(req, res)=>{
         gender
     });
 
-    await emailService.sendAccountCreationEmail(req.user.email, req.user.name, newAccount.userId);
+    await emailService.sendAccountCreationEmail(req.user.email, req.user.name);
 
     return res.status(200).json({message:"Account created successfully", newAccount});
 }
@@ -56,16 +56,16 @@ const getBalance = async(req, res)=>{
 
     const {accountId} = req.params;
 
-    const amount = await accountModel.findOne({
-        _id: amountId,
-        user: req.user._id
+    const accountExist = await account.findOne({
+        _id: accountId,
+        userId: req.user._id
     })
 
-    if(!amount){
+    if(!accountExist){
         return res.status(404).json({message:"Account does not exist for this user"});
     }
 
-    const balance = await account.getBalance()
+    const balance = await accountExist.getBalance()
 
     res.status(404).json({message:"Balance fetched successfully", balance});
 }

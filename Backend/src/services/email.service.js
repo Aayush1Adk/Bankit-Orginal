@@ -94,10 +94,10 @@ async function sendTransactionFailureEmail(userEmail, userName, amount, toAccoun
   await sendEmail(userEmail, subject, text, html);
 }
 
-async function sendAccountCreationEmail(userEmail, userName, accountNumber) {
+async function sendAccountCreationEmail(userEmail, userName) {
   const subject = 'Account Created Successfully';
-  const text = `Hello ${userName},\n\nYour account has been created successfully.\n\nYour account number is: ${accountNumber}\n\nBest regards,\nThe Bankit Team`;
-  const html = `<p>Hello ${userName},</p><p>Your account has been created successfully.</p><p>Your account number is: ${accountNumber}</p><p>Best regards,<br>The Bankit Team</p>`;
+  const text = `Hello ${userName},\n\nYour account has been created successfully.\n\nBest regards,\nThe Bankit Team`;
+  const html = `<p>Hello ${userName},</p><p>Your account has been created successfully.</p><p>Best regards,<br>The Bankit Team</p>`;
   await sendEmail(userEmail, subject, text, html);
 }
 

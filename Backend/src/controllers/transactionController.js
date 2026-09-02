@@ -19,6 +19,10 @@ const createTransaction = async (req, res) => {
         return res.status(400).json({message:"Account is not active"})
     }
 
+    if (fromAccountExist.userId.toString() !== req.user._id.toString()){
+        return res.status(403).json({message:"You are not authorized to perform this transaction"})
+    }
+
     const balance = await fromAccountExist.getBalance();
 
     if(balance < amount){
@@ -47,28 +51,28 @@ const createTransaction = async (req, res) => {
     try{
     session.startTransaction();
 
-    const transaction = await transactionModel.create({
+    const [transaction] = await transactionModel.create([{
         fromAccount,
         toAccount,
         amount,
         idempotencyKey,
-        status:"PENDING"},
+        status:"PENDING"}],
         {session}
     );
 
-    const debitLedgerEntry = await ledgerModel.create({
+    const debitLedgerEntry = await ledgerModel.create([{
         account: fromAccount,
         amount: amount,
         transaction: transaction._id,
-        type: "DEBIT"},
+        type: "DEBIT"}],
     {session}
     );
 
-    const creditLederEntry = await ledgerModel.create({
+    const creditLederEntry = await ledgerModel.create([{
         account: toAccount,
         amount: amount,
         transaction: transaction._id,
-        type: "CREDIT"},
+        type: "CREDIT"}],
     {session}
     );
 
@@ -84,8 +88,9 @@ const createTransaction = async (req, res) => {
     }
 
     catch(err){
-        await emailService.sendTransactionFailureEmail(fromAccountExist.email, fromAccountExist.name, amount, toAccountExist.name);
+
         await session.abortTransaction();
+        await emailService.sendTransactionFailureEmail(fromAccountExist.email, fromAccountExist.name, amount, toAccountExist.name);
         return res.status(400).json({message:"Transaction failed"})
     }
 

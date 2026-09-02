@@ -47,7 +47,7 @@ const transactionMiddleware = async(req, res, next)=>{
         return res.status(400).json({message:"From account and to account cannot be same"});
     }
 
-    if(!mongoose.Type.ObjectId.isValid(fromAccount) || !mongoose.Type.ObjectId.isValid(toAccount)){
+    if(!mongoose.Types.ObjectId.isValid(fromAccount) || !mongoose.Types.ObjectId.isValid(toAccount)){
         return res.status(400).json({message:"Invalid account id"});
     }
 
@@ -58,6 +58,8 @@ const transactionMiddleware = async(req, res, next)=>{
     if(amount <= 0 || isNaN(amount) || amount > 100000000){
         return res.status(400).json({message:"Amount must be greater than 0"});
     }
+
+    
 
     next();
 
