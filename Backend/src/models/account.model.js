@@ -92,14 +92,14 @@ accountSchema.methods.getBalance = async function (){
             }
         }
     ])
-}
 
-if(balanceDate.length === 0){
+
+if(balanceData.length === 0){
     return 0;
 }
 return balanceData[0].balance
 
-
+}
 
 
 const account = mongoose.model("account", accountSchema);

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const blackListToken = await mongoose.Schema({
+const blackListToken = new mongoose.Schema({
     token :{
         type: String,
         required:[true, "Token is required for blacklisting"],

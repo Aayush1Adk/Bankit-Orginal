@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const ledgerModel = await mongoose.Schema({
+const ledgerSchema = new mongoose.Schema({
     account:{
         type: mongoose.Schema.Types.ObjectId,
         required:[true, "Account is required for ledger creation"],
@@ -28,7 +28,7 @@ const ledgerModel = await mongoose.Schema({
     }
 })
 
-ledgerModel.index({account: 1, transaction: 1});
+ledgerSchema.index({account: 1, transaction: 1});
 
 function preventLedgerModification(){
     throw new Error("Ledger cannot be modified");

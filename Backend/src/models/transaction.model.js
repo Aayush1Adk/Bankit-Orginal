@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const transactionSchema = await mongoose.Schema({
+const transactionSchema = new mongoose.Schema({
 
     fromAccount:{
         type: mongoose.Schema.Types.ObjectId,

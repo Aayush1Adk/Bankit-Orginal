@@ -9,8 +9,8 @@ const upload = multer({
 
 const router = express.Router();
 
-router.post("/create", authMiddleware, upload.single("profile"), accountController.accountCreation);
-router.get("/get", authMiddleware, accountController.getAccount);
-router.get("/get",authMiddleware, accountController.getBalance);
+router.post("/create", authMiddleware.authMiddleware, upload.single("profile"), accountController.accountCreation);
+router.get("/get", authMiddleware.authMiddleware, accountController.getAccount);
+router.get("/get",authMiddleware.authMiddleware, accountController.getBalance);
 
 module.exports = router
