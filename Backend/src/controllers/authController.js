@@ -1,6 +1,7 @@
 const user = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 const emailService = require("../services/email.service.js");
+const TokenBlackList = require("../models/blackList.model.js");
 
 
 //--------------------SIGN-UP--------------------//
@@ -335,8 +336,17 @@ const forgetPassword = async(req, res)=>{
 
     //---------------logout-----------------//
 
-    const logoutUser = async (req, res) => {
-    const isProduction = process.env.NODE_ENV === "PRODUCTION";
+const logoutUser = async (req, res) => {
+
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+
+    if (token) {
+        await TokenBlackList.create({
+            token
+        });
+    }
+
+    const isProduction = process.env.NODE_ENV === "production";
 
     res.clearCookie("token", {
         httpOnly: true,
