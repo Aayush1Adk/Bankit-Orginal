@@ -4,6 +4,7 @@ const authMiddleware = require("../middleware/middleware.js");
 
 const router = express.Router();
 
-router.post("/create", authMiddleware.authMiddleware, authMiddleware.transactionMiddleware ,transactionController.createTransaction);
+router.post("/transfer", authMiddleware.authMiddleware, authMiddleware.transferMiddleware ,transactionController.createTransfer);
+router.post("/deposit", authMiddleware.authMiddleware, authMiddleware.depositMiddleware ,transactionController.createDeposit);
 
 module.exports = router

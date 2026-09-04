@@ -4,9 +4,9 @@ const mongoose = require("mongoose");
 const account = require("../models/account.model.js");
 const emailService = require("../services/email.service.js");
 
-const createTransaction = async (req, res) => {
+const createTransfer = async (req, res) => {
 
-    const {fromAccount, toAccount, amount, idempotencyKey} = req.body;
+    const {fromAccount, toAccount, amount, idempotencyKey, type} = req.body;
 
     const fromAccountExist = await account.findOne({ _id: fromAccount });
     const toAccountExist = await account.findOne({ _id: toAccount });
@@ -18,6 +18,8 @@ const createTransaction = async (req, res) => {
     if(fromAccountExist.status !== "ACTIVE" || toAccountExist.status !== "ACTIVE"){
         return res.status(400).json({message:"Account is not active"})
     }
+
+    
 
     if (fromAccountExist.userId.toString() !== req.user._id.toString()){
         return res.status(403).json({message:"You are not authorized to perform this transaction"})
@@ -35,6 +37,9 @@ const createTransaction = async (req, res) => {
 
         if(transactionExist.status === "COMPLETED"){
             return res.status(400).json({message:"Transaction already completed", transaction: transactionExist})
+        }
+        else if(transactionExist.type !== "TRANSFER"){
+            return res.status(400).json({message:"Transaction type mismatch"})
         }
         else if(transactionExist.status === "PENDING"){
             return res.status(400).json({message:"Transaction already pending"})
@@ -56,6 +61,7 @@ const createTransaction = async (req, res) => {
         toAccount,
         amount,
         idempotencyKey,
+        type,
         status:"PENDING"}],
         {session}
     );
@@ -100,4 +106,85 @@ const createTransaction = async (req, res) => {
     }
 }
 
-module.exports = {createTransaction}
+const createDeposit = async (req, res) => {
+
+    const{toAccount, amount, idempotencyKey, type} = req.body;
+
+    const toAccountExist = await account.findOne({ _id: toAccount });
+
+    if(!toAccountExist){
+        return res.status(400).json({message:"Account does not exist"})
+    }
+
+    if(toAccountExist.status !== "ACTIVE"){
+        return res.status(400).json({message:"Account is not active"})
+    }
+
+    if (toAccountExist.userId.toString() !== req.user._id.toString()){
+        return res.status(403).json({message:"You are not authorized to perform this transaction"})
+    }
+
+    const transactionExist = await transactionModel.findOne({idempotencyKey});
+
+    if(transactionExist){
+        if(transactionExist.status === "COMPLETED"){
+            return res.status(400).json({message:"Transaction already completed", transaction: transactionExist})
+        }
+        if(transactionExist.type !== "DEPOSIT"){
+            return res.status(400).json({message:"Transaction type mismatch"})
+        }
+        if(transactionExist.status === "PENDING"){
+            return res.status(400).json({message:"Transaction already pending"})
+        }
+        if(transactionExist.status === "FAILED"){
+            return res.status(400).json({message:"Transaction failed"})
+        }
+        if(transactionExist.status === "REVERSED"){
+            return res.status(400).json({message:"Transaction reversed"})
+        }
+    }
+
+    const session = await mongoose.startSession()
+
+    try{
+        session.startTranction();
+
+        const [transaction] = await transactionModel.create([{
+            toAccount,
+            amount,
+            idempotencyKey,
+            type,
+            status:"COMPLETED"}],
+            {session}
+        );
+
+        const creditLedgerEntry = await ledgerModel.create([{
+            account: toAccount,
+            amount: amount,
+            transaction: transaction._id,
+            type: "CREDIT"}],
+        {session}
+        );
+
+        await transactionModel.updateOne(
+            { _id: transaction._id },
+            { status: "COMPLETED" },
+            { session }
+        );
+
+        await session.commitTransaction();
+
+        return res.status(201).json({ message: "Deposit is  completed successfully",transaction});
+    }
+    catch(err){
+        await session.abortTransaction();
+        return res.status(400).json({message:"Transaction failed"})
+    }
+    finally{
+        await session.endSession();
+    }
+
+}
+
+
+module.exports = {createTransfer, createDeposit}
