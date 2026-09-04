@@ -1,9 +1,8 @@
 const express = require("express");
-const multer = require("multer");
 const cookieParser = require("cookie-parser")
-const accountRouter = require("../src/routers/accountRouter.js");
-const authRouter = require("../src/routers/authRouter.js");
-const transactionRouter = require("../src/routers/transactionRouter.js");
+const accountRouter = require("./routers/accountRouter.js");
+const authRouter = require("./routers/authRouter.js");
+const transactionRouter = require("./routers/transactionRouter.js");
 
 const app = express();
 

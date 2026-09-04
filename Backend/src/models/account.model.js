@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const crypto = require("crypto");
 const ledgerModel = require("../models/ledger.model.js");
 
 const accountSchema = new mongoose.Schema({
@@ -12,6 +13,12 @@ const accountSchema = new mongoose.Schema({
         type: String,
         required:[true,"Profile Picture is required for Registration"],
 
+    },
+    accountNumber: {
+        type: String,
+        required: true,
+        unique: true,
+        immutable: true
     },
     name:{
         type:String,
@@ -67,6 +74,13 @@ accountSchema.methods.calculateAge = function(dateOfBirth) {
 
     return age;
 };
+
+accountSchema.methods.accountNumber = function(){
+    const hex = crypto.randomBytes(2).toString("hex").toUpperCase().slice(0, 3);
+    const numb = crypto.randomInt(10000000, 9999999).toString();
+
+    return `${hex}${numb}`
+}
 
 
 

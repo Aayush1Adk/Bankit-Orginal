@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const userModel = require("../models/user.model.js")
+const TokenBlackList = require("../models/blackList.model.js");
 const transactionModel = require("../models/transaction.model.js");
 
 const authMiddleware = async(req, res, next)=>{
@@ -10,6 +11,13 @@ const authMiddleware = async(req, res, next)=>{
     if(!token){
         return res.status(401).json({message:"Access deined, NO TOKEN "})
     }
+
+    const blacklistedToken = await TokenBlackList.findOne({ token });
+
+    if (blacklistedToken) {
+        return res.status(401).json({ message: "Token is blacklisted" });
+    }
+
     try{
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
@@ -39,7 +47,7 @@ const transactionMiddleware = async(req, res, next)=>{
     const {fromAccount, toAccount, amount, idempotencyKey} = req.body;
     
 
-    if(!fromAccount || !toAccount || !amount || !idempotencyKey){
+    if(!fromAccount || !toAccount || !idempotencyKey){
         return res.status(400).json({message:"All fields are required"});
     }
 
@@ -55,7 +63,7 @@ const transactionMiddleware = async(req, res, next)=>{
         return res.status(400).json({message:"Amount must be a number"});
     }
 
-    if(amount <= 0 || isNaN(amount) || amount > 100000000){
+    if(amount <= 0 || !Number.isFinite(amount)  || amount > 100000000){
         return res.status(400).json({message:"Amount must be greater than 0"});
     }
 

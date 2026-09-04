@@ -82,9 +82,10 @@ const createTransaction = async (req, res) => {
         { session }
     );
     
+    await session.commitTransaction();    
     await emailService.sendTransactionEmail(fromAccountExist.email, fromAccountExist.name, amount, toAccountExist.name)
-    
-    await session.commitTransaction();
+
+    return res.status(201).json({ message: "Transaction completed successfully",transaction});
     }
 
     catch(err){

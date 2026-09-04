@@ -53,11 +53,8 @@ const registerUser = async(req, res)=>{
 
     catch(err){
     console.error("REGISTER ERROR:", err);
-    return res.status(500).json({
-        message: err.message,
-        error: err
-    });
-}
+    return res.status(500).json({ message: "Internal server error & REGISTER ERROR" });
+    }
 }
 
 
@@ -122,11 +119,8 @@ const verifyEmail = async(req, res)=>{
 
     catch(err){
         console.error("EMAIL VERIFICATION ERROR:", err);
-        return res.status(500).json({
-            message: err.message,
-            error: err
-        });
-    }
+        return res.status(500).json({message: "Internal server error & EMAIL VERIFICATION ERROR"});
+        }
 }
 
 
@@ -195,6 +189,10 @@ const loginUser = async(req, res)=>{
         return res.status(400).json({message:"User does not exist"});
     }
 
+    if (!emailExist.isEmailVerified) {
+    return res.status(403).json({message: "Please verify your email before logging in"});
+    }
+
     const isValidPassword = await emailExist.comparePassword(password);
 
     if(!isValidPassword){
@@ -221,11 +219,10 @@ const loginUser = async(req, res)=>{
             name: emailExist.name
         });
 
-        
-
         }
         catch(err){
-            return res.status(400).json({message:"Login Failed"});
+            console.error(err);
+            return res.status(500).json({message: "Internal server error & LOGIN ERROR"});
         }
 
 }
@@ -249,7 +246,6 @@ const forgetPassword = async(req, res)=>{
             return res.status(429).json({message:"OTP can only be sent once per minute"});
         }
 
-
         const createOTP = Math.floor(100000 + Math.random() * 900000);
 
         emailCheck.otp = createOTP;
@@ -262,23 +258,17 @@ const forgetPassword = async(req, res)=>{
 
         await emailCheck.save();
 
-
         await emailService.sendOTPEmail(emailCheck.email, createOTP);
-
 
         return res.status(200).json({
             message: "Check your email for the OTP, it will expire in 2 minutes"
         });
-
-
-
     }
     catch(err){
 
         console.error("FORGET PASSWORD ERROR:", err);
         return res.status(500).json({
             message: "An error occurred while processing your request",
-            error: err
         });
     }
     }
@@ -326,11 +316,9 @@ const forgetPassword = async(req, res)=>{
             message: "Password has been reset successfully"
         });
         }
-        catch(err){
-            return res.status(500).json({
-                message: "An error occurred while resetting the password",
-                error: err
-            });
+    catch(err){
+        console.error(err);
+        return res.status(500).json({message: "Internal server error"});
         }
     }
 
@@ -346,7 +334,7 @@ const logoutUser = async (req, res) => {
         });
     }
 
-    const isProduction = process.env.NODE_ENV === "production";
+    const isProduction = process.env.NODE_ENV === "PRODUCTION";
 
     res.clearCookie("token", {
         httpOnly: true,

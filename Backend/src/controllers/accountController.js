@@ -1,13 +1,14 @@
+const crypto = require("crypto");
 const account = require("../models/account.model.js");
-const user = require("../models/user.model.js");
 const emailService = require("../services/email.service.js");
 const {uploadProfile} = require("../services/cloudinary.js");
 
 const accountCreation = async(req, res)=>{
 
     const userId = req.user._id;
-    const {name, dateOfBirth, location, gender} = req.body;
+    const {name ,accountNumber ,dateOfBirth, location, gender} = req.body;
     const profile = req.file;
+    const accountNumber = account.accountNumber();
 
     if(!userId || !name || !dateOfBirth || !location || !gender){
         return res.status(400).json({message:"All fields are required"});
@@ -28,6 +29,7 @@ const accountCreation = async(req, res)=>{
     const newAccount = await account.create({
         profile: profileUrl.secure_url,
         userId,
+        accountNumber,
         name,
         dateOfBirth,
         location,
@@ -67,7 +69,7 @@ const getBalance = async(req, res)=>{
 
     const balance = await accountExist.getBalance()
 
-    res.status(404).json({message:"Balance fetched successfully", balance});
+    res.status(200).json({message:"Balance fetched successfully", balance});
 }
 
 
