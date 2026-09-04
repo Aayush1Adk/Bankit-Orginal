@@ -73,7 +73,7 @@ const transferMiddleware = async(req, res, next)=>{
 const depositMiddleware = async(req, res, next)=>{
     const {toAccount, amount, idempotencyKey, type} = req.body;
 
-    if(!toAccount || !idempotencyKey){
+    if(!toAccount || !idempotencyKey || !amount || !type){
         return res.status(400).json({message:"All fields are required"});
     }
 
@@ -92,6 +92,28 @@ const depositMiddleware = async(req, res, next)=>{
     next();
 }
 
+const createWithdrawalMiddleware = async(req, res, next)=>{
+    
+    const{fromAccount, amount, idempotencyKey, type} = req.body;
+
+    if(!fromAccount || !idempotencyKey || !amount || !type){
+        return res.status(400).json({message:"All fields are required"});
+    }
+
+    if(!mongoose.Types.ObjectId.isValid(fromAccount)){
+        return res.status(400).json({message:"Invalid account id"});
+    }
+
+    if(typeof amount !== "number"){
+        return res.status(400).json({message:"Amount must be a number"});
+    }
+
+    if(amount <= 0 || !Number.isFinite(amount)  || amount > 100000000){
+        return res.status(400).json({message:"Amount must be greater than 0"});
+    }
+
+}
 
 
-module.exports = {authMiddleware, transferMiddleware, depositMiddleware}
+
+module.exports = {authMiddleware, transferMiddleware, depositMiddleware, createWithdrawalMiddleware}
