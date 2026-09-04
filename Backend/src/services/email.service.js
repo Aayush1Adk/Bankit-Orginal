@@ -57,7 +57,7 @@ const sendEmail = async (to, subject, text, html) => {
 async function sendRegistrationEmail(userEmail, userName, otp) {
     const subject = 'Welcome to Bankit!';
     const text = `Hello ${userName},\n\nThank you for registering with Bankit! We're excited to have you on board.\n\nYour OTP for verification is: ${otp}\n\nBest regards,\nThe Bankit Team`;
-    const html = `<p>Hello ${userName},</p><p>Thank you for registering with <strong>Bankit</strong>! We're excited to have you on board.</p><p>Your OTP for verification is: ${otp}</p><p>Best regards,<br>The Bankit Team</p>`;
+    const html = `<p>Hello ${userName},</p><p>Thank you for registering with <strong>Bankit</strong>! We're excited to have you on board.</p><p>Your OTP for verification is: <strong> ${otp}</strong></p><p>Best regards,<br>The Bankit Team</p>`;
 
     await sendEmail(userEmail, subject, text, html);
 }
@@ -94,10 +94,10 @@ async function sendTransactionFailureEmail(userEmail, userName, amount, toAccoun
   await sendEmail(userEmail, subject, text, html);
 }
 
-async function sendAccountCreationEmail(userEmail, userName) {
+async function sendAccountCreationEmail(userEmail, userName, accountNumber) {
   const subject = 'Account Created Successfully';
-  const text = `Hello ${userName},\n\nYour account has been created successfully.\n\nBest regards,\nThe Bankit Team`;
-  const html = `<p>Hello ${userName},</p><p>Your account has been created successfully.</p><p>Best regards,<br>The Bankit Team</p>`;
+  const text = `Hello ${userName},\n\nYour account has been created successfully.\n\nYour account number is: <strong>${accountNumber}</strong>\n\nBest regards,\nThe Bankit Team`;
+  const html = `<p>Hello <strong><i>${userName}</i></strong>,</p><p>Your account has been created successfully.</p><p>Your account number is: <strong>${accountNumber}</strong></p><p>Best regards,<br>The Bankit Team</p>`;
   await sendEmail(userEmail, subject, text, html);
 }
 

@@ -16,7 +16,6 @@ const accountSchema = new mongoose.Schema({
     },
     accountNumber: {
         type: String,
-        required: true,
         unique: true,
         immutable: true
     },
@@ -57,7 +56,7 @@ const accountSchema = new mongoose.Schema({
     timestamps:true
 })
 
-accountSchema.index({userId: 1, name: 1 ,status: 1}); 
+accountSchema.index({userId: 1, name: 1, accountNumber: 1 ,status: 1}); 
 
 
 accountSchema.methods.calculateAge = function(dateOfBirth) {
@@ -75,11 +74,11 @@ accountSchema.methods.calculateAge = function(dateOfBirth) {
     return age;
 };
 
-accountSchema.methods.accountNumber = function(){
+accountSchema.methods.generateAccountNumber = function(){
     const hex = crypto.randomBytes(2).toString("hex").toUpperCase().slice(0, 3);
-    const numb = crypto.randomInt(10000000, 9999999).toString();
+    const numb = crypto.randomInt(1000000, 10000000).toString();
 
-    return `${hex}${numb}`
+    return `${hex}${numb}`;
 }
 
 

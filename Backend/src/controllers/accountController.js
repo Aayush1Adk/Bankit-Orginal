@@ -6,9 +6,8 @@ const {uploadProfile} = require("../services/cloudinary.js");
 const accountCreation = async(req, res)=>{
 
     const userId = req.user._id;
-    const {name ,accountNumber ,dateOfBirth, location, gender} = req.body;
+    const {name ,dateOfBirth, location, gender} = req.body;
     const profile = req.file;
-    const accountNumber = account.accountNumber();
 
     if(!userId || !name || !dateOfBirth || !location || !gender){
         return res.status(400).json({message:"All fields are required"});
@@ -24,6 +23,7 @@ const accountCreation = async(req, res)=>{
         return res.status(400).json({ message: "Account already exists for this user" });
     }
 
+    const accountNumber = new account().generateAccountNumber();
     const profileUrl = await uploadProfile(profile.buffer, profile.mimetype);
 
     const newAccount = await account.create({
@@ -36,7 +36,7 @@ const accountCreation = async(req, res)=>{
         gender
     });
 
-    await emailService.sendAccountCreationEmail(req.user.email, req.user.name);
+    await emailService.sendAccountCreationEmail(req.user.email, newAccount.name, newAccount.accountNumber);
 
     return res.status(200).json({message:"Account created successfully", newAccount});
 }

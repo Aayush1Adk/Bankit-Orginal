@@ -12,6 +12,14 @@ const transactionSchema = new mongoose.Schema({
         required:[true, "To Account is required for transaction creation"],
         ref: "account"
     },
+    type:{
+        type: String,
+        enum:{
+            values:["TRANSFER", "DEPOSIT", "WITHDRAWAL"],
+            message:"Type must be either TRANSFER, DEPOSIT or WITHDRAWAL"
+        },
+        required:[true, "Type is required for transaction creation"]
+    },
     status:{
         type: String,
         enum:{
