@@ -147,7 +147,7 @@ const createDeposit = async (req, res) => {
     const session = await mongoose.startSession()
 
     try{
-        session.startTranction();
+        session.startTransaction();
 
         const [transaction] = await transactionModel.create([{
             toAccount,
@@ -229,7 +229,7 @@ const createWithdrawal = async (req, res) =>{
 
     const session = await mongoose.startSession()
     try{
-        session.startTranction();
+        session.startTransaction();
 
         const [transaction] = await transactionModel.create([{
             fromAccount,

@@ -4,12 +4,12 @@ const transactionSchema = new mongoose.Schema({
 
     fromAccount:{
         type: mongoose.Schema.Types.ObjectId,
-        required:[true, "From Account is required for transaction creation"],
+        default: null,
         ref: "account"
     },
     toAccount:{
         type: mongoose.Schema.Types.ObjectId,
-        required:[true, "To Account is required for transaction creation"],
+        default: null,
         ref: "account"
     },
     type:{
@@ -31,7 +31,7 @@ const transactionSchema = new mongoose.Schema({
     amount:{
         type: Number,
         required:[true, "Amount is required for transaction creation"],
-        min:[0, "Amount must be greater than 0"]
+        min:[1, "Amount must be greater than 0"]
     },
     idempotencyKey:{
         type: String,

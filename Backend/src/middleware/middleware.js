@@ -71,9 +71,9 @@ const transferMiddleware = async(req, res, next)=>{
 }
 
 const depositMiddleware = async(req, res, next)=>{
-    const {toAccount, amount, idempotencyKey, type} = req.body;
+    const {toAccount, amount, idempotencyKey} = req.body;
 
-    if(!toAccount || !idempotencyKey || !amount || !type){
+    if(!toAccount || !idempotencyKey || !amount){
         return res.status(400).json({message:"All fields are required"});
     }
 
@@ -112,6 +112,7 @@ const createWithdrawalMiddleware = async(req, res, next)=>{
         return res.status(400).json({message:"Amount must be greater than 0"});
     }
 
+    next();
 }
 
 
