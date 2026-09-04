@@ -89,7 +89,7 @@ const createTransfer = async (req, res) => {
     );
     
     await session.commitTransaction();    
-    await emailService.sendTransactionEmail(fromAccountExist.email, fromAccountExist.name, amount, toAccountExist.name)
+    await emailService.sendTransactionEmail( req.user.email, fromAccountExist.name, amount, toAccountExist.name)
 
     return res.status(201).json({ message: "Transaction completed successfully",transaction});
     }
@@ -97,7 +97,7 @@ const createTransfer = async (req, res) => {
     catch(err){
 
         await session.abortTransaction();
-        await emailService.sendTransactionFailureEmail(fromAccountExist.email, fromAccountExist.name, amount, toAccountExist.name);
+        await emailService.sendTransactionFailureEmail( req.user.email, fromAccountExist.name, amount, toAccountExist.name);
         return res.status(400).json({message:"Transaction failed"})
     }
 
@@ -173,7 +173,7 @@ const createDeposit = async (req, res) => {
         );
 
         await session.commitTransaction();
-
+        await emailService.sendDepositEmail( req.user.email, toAccountExist.name, amount)
         return res.status(201).json({ message: "Deposit is  completed successfully",transaction});
     }
     catch(err){

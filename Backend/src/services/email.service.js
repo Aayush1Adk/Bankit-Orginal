@@ -94,6 +94,20 @@ async function sendTransactionFailureEmail(userEmail, userName, amount, toAccoun
   await sendEmail(userEmail, subject, text, html);
 }
 
+async function sendDepositEmail(userEmail, userName, amount) {
+  const subject = 'Deposit Successful';
+  const text = `Hello ${userName},\n\nYou have successfully deposited $${amount} into your account.\n\nBest regards,\nThe Bankit Team`;
+  const html = `<p>Hello ${userName},</p><p>You have successfully deposited $${amount} into your account.</p><p>Best regards,<br>The Bankit Team</p>`;
+  await sendEmail(userEmail, subject, text, html);
+}
+
+async function sendWithDrawalEmail(userEmail, userName, amount){
+  const subject = 'Withdrawal Successful';
+  const text = `Hello ${userName},\n\nYou have successfully withdrawn $${amount} from your account.\n\nBest regards,\nThe Bankit Team`;
+  const html = `<p>Hello ${userName},</p><p>You have successfully withdrawn $${amount} from your account.</p><p>Best regards,<br>The Bankit Team</p>`;
+  await sendEmail(userEmail, subject, text, html);
+}
+
 async function sendAccountCreationEmail(userEmail, userName, accountNumber) {
   const subject = 'Account Created Successfully';
   const text = `Hello ${userName},\n\nYour account has been created successfully.\n\nYour account number is: <strong>${accountNumber}</strong>\n\nBest regards,\nThe Bankit Team`;
@@ -101,4 +115,4 @@ async function sendAccountCreationEmail(userEmail, userName, accountNumber) {
   await sendEmail(userEmail, subject, text, html);
 }
 
-module.exports = {sendEmail, sendRegistrationEmail, sendLoginEmail, sendOTPEmail, sendTransactionEmail, sendTransactionFailureEmail, sendAccountCreationEmail};
+module.exports = {sendEmail, sendRegistrationEmail, sendLoginEmail, sendOTPEmail, sendTransactionEmail, sendTransactionFailureEmail, sendAccountCreationEmail, sendDepositEmail};
