@@ -54,10 +54,10 @@ const sendEmail = async (to, subject, text, html) => {
 
 
 
-async function sendRegistrationEmail(userEmail, userName, otp) {
+async function sendRegistrationEmail(userEmail, otp) {
     const subject = 'Welcome to Bankit!';
-    const text = `Hello ${userName},\n\nThank you for registering with Bankit! We're excited to have you on board.\n\nYour OTP for verification is: ${otp}\n\nBest regards,\nThe Bankit Team`;
-    const html = `<p>Hello ${userName},</p><p>Thank you for registering with <strong>Bankit</strong>! We're excited to have you on board.</p><p>Your OTP for verification is: <strong> ${otp}</strong></p><p>Best regards,<br>The Bankit Team</p>`;
+    const text = `Hello \n\nThank you for registering with Bankit! We're excited to have you on board.\n\nYour OTP for verification is: ${otp}\n\nBest regards,\nThe Bankit Team`;
+    const html = `<p>Hello ,</p><p>Thank you for registering with <strong>Bankit</strong>! We're excited to have you on board.</p><p>Your OTP for verification is: <strong> ${otp}</strong></p><p>Best regards,<br>The Bankit Team</p>`;
 
     await sendEmail(userEmail, subject, text, html);
 }
@@ -81,30 +81,30 @@ async function sendOTPEmail(userEmail, otp){
 async function sendTransactionEmail(userEmail, userName, amount, toAccount) {
 
   const subject = 'Transaction Successful';
-  const text = `Hello ${userName},\n\nYou have successfully transferred $${amount} to ${toAccount}.\n\nBest regards,\nThe Bankit Team`;
-  const html = `<p>Hello ${userName},</p><p>You have successfully transferred $${amount} to ${toAccount}.</p><p>Best regards,<br>The Bankit Team</p>`;
+  const text = `Hello ${userName},\n\nYou have successfully transferred Rs.${amount} to ${toAccount}.\n\nBest regards,\nThe Bankit Team`;
+  const html = `<p>Hello ${userName},</p><p>You have successfully transferred Rs.${amount} to ${toAccount}.</p><p>Best regards,<br>The Bankit Team</p>`;
 
   await sendEmail(userEmail, subject, text, html);
 }
 
 async function sendTransactionFailureEmail(userEmail, userName, amount, toAccount) {
   const subject = 'Transaction Failed';
-  const text = `Hello ${userName},\n\nYour transaction of $${amount} to ${toAccount} has failed.\n\nBest regards,\nThe Bankit Team`;
-  const html = `<p>Hello ${userName},</p><p>Your transaction of $${amount} to ${toAccount} has failed.</p><p>Best regards,<br>The Bankit Team</p>`;
+  const text = `Hello ${userName},\n\nYour transaction of Rs.${amount} to ${toAccount} has failed.\n\nBest regards,\nThe Bankit Team`;
+  const html = `<p>Hello ${userName},</p><p>Your transaction of Rs.${amount} to ${toAccount} has failed.</p><p>Best regards,<br>The Bankit Team</p>`;
   await sendEmail(userEmail, subject, text, html);
 }
 
 async function sendDepositEmail(userEmail, userName, amount) {
   const subject = 'Deposit Successful';
-  const text = `Hello ${userName},\n\nYou have successfully deposited $${amount} into your account.\n\nBest regards,\nThe Bankit Team`;
-  const html = `<p>Hello ${userName},</p><p>You have successfully deposited $${amount} into your account.</p><p>Best regards,<br>The Bankit Team</p>`;
+  const text = `Hello ${userName},\n\nYou have successfully deposited Rs.${amount} into your account.\n\nBest regards,\nThe Bankit Team`;
+  const html = `<p>Hello ${userName},</p><p>You have successfully deposited Rs.${amount} into your account.</p><p>Best regards,<br>The Bankit Team</p>`;
   await sendEmail(userEmail, subject, text, html);
 }
 
 async function sendWithDrawalEmail(userEmail, userName, amount){
   const subject = 'Withdrawal Successful';
-  const text = `Hello ${userName},\n\nYou have successfully withdrawn $${amount} from your account.\n\nBest regards,\nThe Bankit Team`;
-  const html = `<p>Hello ${userName},</p><p>You have successfully withdrawn $${amount} from your account.</p><p>Best regards,<br>The Bankit Team</p>`;
+  const text = `Hello ${userName},\n\nYou have successfully withdrawn Rs.${amount} from your account.\n\nBest regards,\nThe Bankit Team`;
+  const html = `<p>Hello ${userName},</p><p>You have successfully withdrawn Rs.${amount} from your account.</p><p>Best regards,<br>The Bankit Team</p>`;
   await sendEmail(userEmail, subject, text, html);
 }
 

@@ -255,7 +255,7 @@ const createWithdrawal = async (req, res) =>{
         );
 
         await session.commitTransaction();
-
+        await emailService.sendWithdrawalEmail( req.user.email, fromAccountExist.name, amount)
         return res.status(201).json({ message: "Withdrawal is  completed successfully",transaction});
     }
     catch(err){

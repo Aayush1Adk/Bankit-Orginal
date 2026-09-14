@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema({
         ],    
         default: null
     },
+    otpResendCount: {
+        type: Number,
+        default: 0
+    },
     password:{
         type:String,
         required:[true,"Password is required for Registration"],

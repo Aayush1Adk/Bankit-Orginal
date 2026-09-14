@@ -1,5 +1,6 @@
 const user = require("../models/user.model");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const emailService = require("../services/email.service.js");
 const TokenBlackList = require("../models/blackList.model.js");
 
@@ -27,7 +28,7 @@ const registerUser = async(req, res)=>{
 
     })
 
-    const createOTP = Math.floor(100000 + Math.random() * 900000);
+    const createOTP = crypto.randomInt(100000, 1000000);
 
     newUser.otp = createOTP;
 
@@ -39,7 +40,7 @@ const registerUser = async(req, res)=>{
 
     await newUser.save();
 
-    await emailService.sendRegistrationEmail(newUser.email, newUser.name, newUser.otp);
+    await emailService.sendRegistrationEmail(newUser.email, newUser.otp);
 
 
         console.log(`User has been created successfully. OTP is: ${createOTP}`)
@@ -147,7 +148,7 @@ const sendOTP = async(req, res)=>{
     }
 
 
-    const createOTP = Math.floor(100000 + Math.random() * 900000);
+    const createOTP = crypto.randomInt(100000, 1000000);
 
     newUser.otp = createOTP;
 
@@ -246,8 +247,7 @@ const forgetPassword = async(req, res)=>{
             return res.status(429).json({message:"OTP can only be sent once per minute"});
         }
 
-        const createOTP = Math.floor(100000 + Math.random() * 900000);
-
+        const createOTP =crypto.randomInt(100000, 1000000);
         emailCheck.otp = createOTP;
 
         emailCheck.otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000);
