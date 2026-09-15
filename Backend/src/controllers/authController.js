@@ -103,7 +103,7 @@ const verifyEmail = async(req, res)=>{
 
     const isProduction = process.env.NODE_ENV === "PRODUCTION";
 
-    const token = jwt.sign({id: emailExist._id, email: emailExist.email }, process.env.JWT_SECRET,{ expiresIn: "3d" })
+    const token = jwt.sign({id: emailExist._id, tokenVersion: emailExist.tokenVersion, email: emailExist.email }, process.env.JWT_SECRET,{ expiresIn: "3d" })
 
     res.cookie("token", token,{
         httpOnly: true,
@@ -200,7 +200,7 @@ const loginUser = async(req, res)=>{
         return res.status(400).json({message:"Password is incorrect"});
     }
 
-        const token = jwt.sign({ id: emailExist._id, email: emailExist.email } ,process.env.JWT_SECRET,{expiresIn:"3d"});
+        const token = jwt.sign({ id: emailExist._id, tokenVersion: emailExist.tokenVersion, email: emailExist.email } ,process.env.JWT_SECRET,{expiresIn:"3d"});
 
         const isProduction = process.env.NODE_ENV === "PRODUCTION";
 
@@ -310,7 +310,15 @@ const forgetPassword = async(req, res)=>{
         emailExist.otpExpiresAt = null;
         emailExist.otpPurpose = null;
 
+        emailExist.tokenVersion += 1;
+
         await emailExist.save();
+
+        res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "PRODUCTION",
+        sameSite: process.env.NODE_ENV === "PRODUCTION" ? "none" : "lax"
+        });
 
         return res.status(200).json({
             message: "Password has been reset successfully"

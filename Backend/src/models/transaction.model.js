@@ -18,7 +18,6 @@ const transactionSchema = new mongoose.Schema({
             values:["TRANSFER", "DEPOSIT", "WITHDRAWAL"],
             message:"Type must be either TRANSFER, DEPOSIT or WITHDRAWAL"
         },
-        required:[true, "Type is required for transaction creation"]
     },
     status:{
         type: String,
@@ -27,6 +26,13 @@ const transactionSchema = new mongoose.Schema({
             message:"Status must be either PENDING, COMPLETED, FAILED or REVERSED"
         },
         default:"PENDING"
+    },
+    remark:{
+        type: String,
+        required:[true, "Remark is required for transaction creation"],
+        trim:true,
+        max:[100, "Remark should be at most 100 characters"],
+        min:[3, "Remark should be at least 3 characters"],
     },
     amount:{
         type: Number,

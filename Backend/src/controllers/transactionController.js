@@ -6,7 +6,7 @@ const emailService = require("../services/email.service.js");
 
 const createTransfer = async (req, res) => {
 
-    const {fromAccount, toAccount, amount, idempotencyKey, type} = req.body;
+    const {fromAccount, toAccount, amount, idempotencyKey} = req.body;
 
     const fromAccountExist = await account.findOne({ _id: fromAccount });
     const toAccountExist = await account.findOne({ _id: toAccount });
@@ -108,7 +108,7 @@ const createTransfer = async (req, res) => {
 
 const createDeposit = async (req, res) => {
 
-    const{toAccount, amount, idempotencyKey, type} = req.body;
+    const{toAccount, amount, idempotencyKey} = req.body;
 
     const toAccountExist = await account.findOne({ _id: toAccount });
 
@@ -188,7 +188,7 @@ const createDeposit = async (req, res) => {
 
 
 const createWithdrawal = async (req, res) =>{
-    const{fromAccount, amount, idempotencyKey, type} = req.body;
+    const{fromAccount, amount, idempotencyKey} = req.body;
 
     const fromAccountExist = await account.findOne({ _id: fromAccount });
 

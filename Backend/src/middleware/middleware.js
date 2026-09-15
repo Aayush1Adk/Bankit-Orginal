@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
-const userModel = require("../models/user.model.js")
+const user = require("../models/user.model.js")
 const TokenBlackList = require("../models/blackList.model.js");
 const transactionModel = require("../models/transaction.model.js");
 
@@ -21,7 +21,7 @@ const authMiddleware = async(req, res, next)=>{
     try{
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        const user = await userModel.findOne({_id: decoded.id})
+        const user = await user.findOne({_id: decoded.id})
 
     if (!user) {
         return res.status(401).json({ message: "User not found" });
@@ -30,6 +30,11 @@ const authMiddleware = async(req, res, next)=>{
     if (!user.isEmailVerified) {
         return res.status(403).json({ message: "User is not verified, please verify your email first"});
     }
+
+    if (decoded.tokenVersion !== user.tokenVersion) {
+        return res.status(401).json({ message: "Session expired. Please log in again." });
+        }
+
         req.user = user;
 
         next();
