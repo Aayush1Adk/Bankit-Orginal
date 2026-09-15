@@ -337,8 +337,11 @@ const logoutUser = async (req, res) => {
     const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
 
     if (token) {
+
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
         await TokenBlackList.create({
-            token
+            tokenHash
         });
     }
 

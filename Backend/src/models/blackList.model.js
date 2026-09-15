@@ -4,7 +4,7 @@ const blackListTokenSchema = new mongoose.Schema({
     token :{
         type: String,
         required:[true, "Token is required for blacklisting"],
-        unique:[true, "Token already exists in black list"]
+        unique: true,
     }
 },
 {

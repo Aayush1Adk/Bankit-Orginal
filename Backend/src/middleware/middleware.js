@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
-const user = require("../models/user.model.js")
+const user = require("../models/user.model.js");
 const TokenBlackList = require("../models/blackList.model.js");
 const transactionModel = require("../models/transaction.model.js");
 
@@ -12,7 +12,8 @@ const authMiddleware = async(req, res, next)=>{
         return res.status(401).json({message:"Access deined, NO TOKEN "})
     }
 
-    const blacklistedToken = await TokenBlackList.findOne({ token });
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const blacklistedToken = await TokenBlackList.findOne({ tokenHash });
 
     if (blacklistedToken) {
         return res.status(401).json({ message: "Token is blacklisted" });
